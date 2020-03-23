@@ -1,6 +1,6 @@
 import Player from '../entity/Player'
 import InventoryItem from '../entity/InventoryItem'
-import {populateInventoryBar, pickUpItem} from '../entity/utilityFunctions'
+import {populateInventoryBar} from '../entity/utilityFunctions'
 
 export default class WorldScene extends Phaser.Scene {
   constructor() {
