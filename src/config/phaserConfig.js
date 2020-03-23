@@ -1,4 +1,4 @@
-export default {
+const phaserConfig = {
   type: Phaser.AUTO,
   parent: 'content',
   width: 320 * 3,
@@ -13,3 +13,5 @@ export default {
     }
   }
 }
+
+export default phaserConfig
