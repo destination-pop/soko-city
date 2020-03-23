@@ -4,9 +4,9 @@ const webpack = require('webpack');
 const path = require('path');
 require('dotenv').config({path: __dirname + '/.env'})
 
-const {
-  NODE_ENV: mode
-} = process.env
+// const {
+//   NODE_ENV: mode
+// } = process.env
 
 const devServer = {
   contentBase: './public',
@@ -15,7 +15,8 @@ const devServer = {
 
 module.exports = {
 
-  mode,
+  // mode,
+  mode: 'development',
 
   devServer,
 
