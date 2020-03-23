@@ -1,4 +1,6 @@
 import Player from '../entity/Player'
+import InventoryItem from '../entity/InventoryItem'
+import {populateInventoryBar, pickUpItem} from '../entity/utilityFunctions'
 
 export default class WorldScene extends Phaser.Scene {
   constructor() {
@@ -17,7 +19,24 @@ export default class WorldScene extends Phaser.Scene {
       frameWidth: 16,
       frameHeight: 16
     })
+
+    //preload inventory item sprites
+    this.load.spritesheet('cookie', 'assets/sprites/foodSprites.png', {
+      frameWidth: 16,
+      frameHeight: 16
+    })
+
+    this.load.spritesheet('avocado', 'assets/sprites/foodSprites.png', {
+      frameWidth: 16,
+      frameHeight: 16
+    })
+
+    //preload backgound color for the inventory bar
+    this.load.image('graySquare', 'assets/sprites/graySquare.png')
+
   }
+
+
 
   create() {
 
@@ -30,8 +49,17 @@ export default class WorldScene extends Phaser.Scene {
     //establishing collision rules for obstacle layer
     obstacles.setCollisionByExclusion([-1])
 
-    //adding player 
+    //adding player
     this.player = new Player(this, 50, 100, 'player')
+
+    //adding the inventory items (sprinkled throughout the scene)
+    //NOTE: There is a bug with collisions & static groups, so we create one by one
+    this.inventoryItems = {}
+    this.inventoryItems.cookie = new InventoryItem(this, 130, 70, 'cookie')
+    this.inventoryItems.avocado = new InventoryItem(this, 50, 260, 'avocado')
+
+    //creating and populating the inventory bar
+    populateInventoryBar(this, 'cookie','avocado')
 
     //setting our world bounds
     this.physics.world.bounds.width = map.widthInPixels
@@ -39,9 +67,12 @@ export default class WorldScene extends Phaser.Scene {
 
     //setting collision rules for player
     this.physics.add.collider(this.player, obstacles)
+    this.physics.add.overlap(this.player, this.inventoryItems.cookie, this.pickUpItem, null, this)
+    this.physics.add.overlap(this.player, this.inventoryItems.avocado, this.pickUpItem, null, this)
     this.player.setCollideWorldBounds(true)
 
-    //setting camera 
+
+    //setting camera
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels)
     this.cameras.main.startFollow(this.player)
     this.cameras.main.roundPixels = true
@@ -52,6 +83,17 @@ export default class WorldScene extends Phaser.Scene {
 
     //animating sprite motion
     this.createAnimations()
+  }
+
+  //callback for player/inventory item overlap
+  pickUpItem(player, item) {
+    item.disableBody(true, true)
+    item.setVisible(false)
+    this.inventoryBar.children.entries.forEach(el=>{
+      if (item.texture.key === el.texture.key) {
+        el.clearTint()
+      }
+    })
   }
 
   //creating animation sequence for player movement
