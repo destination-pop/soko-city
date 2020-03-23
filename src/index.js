@@ -7,9 +7,11 @@ class Game extends Phaser.Game {
   constructor() {
     super(config);
 
+    //Add all the scenes
     this.scene.add('WorldScene', WorldScene)
     this.scene.add('MainScene', MainScene)
 
+    //Start the game with the main scene
     this.scene.start('MainScene')
   }
 }
