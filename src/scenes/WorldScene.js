@@ -1,7 +1,7 @@
 import Player from '../entity/Player'
 import InventoryItem from '../entity/InventoryItem'
-import {populateInventoryBar} from '../entity/utilityFunctions'
-import {puzzle, puzzleConfig} from '../puzzles/converter'
+import { populateInventoryBar } from '../entity/utilityFunctions'
+import { puzzleConfig } from '../puzzles/converter'
 
 let groundLayer
 let objectLayer
@@ -41,29 +41,33 @@ export default class WorldScene extends Phaser.Scene {
 
   create() {
     //setting up dynamic map and object layers
-    map = this.make.tilemap({
-      tileWidth: 16,
-      tileHeight: 16,
-      width: 75,
-      height: 75
-    })
+    const map = this.make.tilemap(puzzleConfig)
+    const tiles = map.addTilesetImage('puzzleTiles')
+    const layer = map.createDynamicLayer(0,tiles,0,0)
 
-    var tiles = map.addTilesetImage('tiles')
+    // map = this.make.tilemap({
+    //   tileWidth: 16,
+    //   tileHeight: 16,
+    //   width: 75,
+    //   height: 75
+    // })
 
-    groundLayer = map.createBlankDynamicLayer('Ground Layer', tiles)
-    objectLayer = map.createBlankDynamicLayer('Object Layer', tiles)
+    // var tiles = map.addTilesetImage('tiles')
 
-    // Walls & corners of the room
-    groundLayer.fill(1, 0, 0, map.width, 1)
-    groundLayer.fill(43, 0, map.height - 1, map.width, 1)
-    groundLayer.fill(21, 0, 0, 1, map.height)
-    groundLayer.fill(23, map.width - 1, 0, 1, map.height)
-    groundLayer.putTileAt(0, 0, 0)
-    groundLayer.putTileAt(2, map.width - 1, 0)
-    groundLayer.putTileAt(44, map.width - 1, map.height - 1)
-    groundLayer.putTileAt(42, 0, map.height - 1)
+    // groundLayer = map.createBlankDynamicLayer('Ground Layer', tiles)
+    // objectLayer = map.createBlankDynamicLayer('Object Layer', tiles)
 
-    randomizeWorld() // Initial randomization
+    // // Walls & corners of the room
+    // groundLayer.fill(1, 0, 0, map.width, 1)
+    // groundLayer.fill(43, 0, map.height - 1, map.width, 1)
+    // groundLayer.fill(21, 0, 0, 1, map.height)
+    // groundLayer.fill(23, map.width - 1, 0, 1, map.height)
+    // groundLayer.putTileAt(0, 0, 0)
+    // groundLayer.putTileAt(2, map.width - 1, 0)
+    // groundLayer.putTileAt(44, map.width - 1, map.height - 1)
+    // groundLayer.putTileAt(42, 0, map.height - 1)
+
+    // randomizeWorld() // Initial randomization
     // un-comment below to randomize world on-click
     // this.input.on('pointerdown', randomizeWorld)
 
