@@ -88,7 +88,8 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   tempLogging() {
-    console.log('puzzle: ', puzzle.data)
+    console.log('puzzle: ', puzzle._data._data)
+    console.log('puzzle type: ', typeof puzzle)
     // console.log('type: ', typeof puzzle)
   }
 

@@ -1,4 +1,4 @@
-import {generateSokobanLevel} from sokoban-generator;
+const sokobanGenerator = require("sokoban-generator");
 // from: https://github.com/AnoXDD/sokoban-generator-javascript
 
 
@@ -28,6 +28,6 @@ const options = {
   type: "class"
 };
 
-let puzzle = generateSokobanLevel(options);
+let puzzle = sokobanGenerator.generateSokobanLevel(options);
 
 export default puzzle
