@@ -1,6 +1,5 @@
 import Player from '../entity/Player'
 import InventoryItem from '../entity/InventoryItem'
-import {populateInventoryBar} from '../entity/utilityFunctions'
 
 export default class WorldScene extends Phaser.Scene {
   constructor() {
@@ -20,7 +19,7 @@ export default class WorldScene extends Phaser.Scene {
       frameHeight: 16
     })
 
-    //preload inventory item sprites
+    // preload inventory item sprites
     this.load.spritesheet('cookie', 'assets/sprites/foodSprites.png', {
       frameWidth: 16,
       frameHeight: 16
@@ -30,9 +29,6 @@ export default class WorldScene extends Phaser.Scene {
       frameWidth: 16,
       frameHeight: 16
     })
-
-    //preload backgound color for the inventory bar
-    this.load.image('graySquare', 'assets/sprites/graySquare.png')
 
   }
 
@@ -55,11 +51,8 @@ export default class WorldScene extends Phaser.Scene {
     //adding the inventory items (sprinkled throughout the scene)
     //NOTE: There is a bug with collisions & static groups, so we create one by one
     this.inventoryItems = {}
-    this.inventoryItems.cookie = new InventoryItem(this, 130, 70, 'cookie')
+    this.inventoryItems.cookie = new InventoryItem(this, 150, 70, 'cookie')
     this.inventoryItems.avocado = new InventoryItem(this, 50, 260, 'avocado')
-
-    //creating and populating the inventory bar
-    populateInventoryBar(this, 'cookie','avocado')
 
     //setting our world bounds
     this.physics.world.bounds.width = map.widthInPixels
@@ -67,8 +60,8 @@ export default class WorldScene extends Phaser.Scene {
 
     //setting collision rules for player
     this.physics.add.collider(this.player, obstacles)
-    this.physics.add.overlap(this.player, this.inventoryItems.cookie, this.pickUpItem, null, this)
-    this.physics.add.overlap(this.player, this.inventoryItems.avocado, this.pickUpItem, null, this)
+    this.physics.add.overlap(this.player, this.inventoryItems.cookie, this.pickUpItem, false, this)
+    this.physics.add.overlap(this.player, this.inventoryItems.avocado, this.pickUpItem, false, this)
     this.player.setCollideWorldBounds(true)
 
 
@@ -85,15 +78,11 @@ export default class WorldScene extends Phaser.Scene {
     this.createAnimations()
   }
 
-  //callback for player/inventory item overlap
+  // callback for player/inventory item overlap
   pickUpItem(player, item) {
     item.disableBody(true, true)
     item.setVisible(false)
-    this.inventoryBar.children.entries.forEach(el=>{
-      if (item.texture.key === el.texture.key) {
-        el.clearTint()
-      }
-    })
+    this.events.emit('itemAdded', item)
   }
 
   //creating animation sequence for player movement

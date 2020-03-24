@@ -6,6 +6,8 @@ export default class MainScene extends Phaser.Scene {
   }
 
   create() {
+    
     this.scene.launch('WorldScene')
+    this.scene.launch('UIScene')
   }
 }

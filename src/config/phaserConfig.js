@@ -1,6 +1,6 @@
 const phaserConfig = {
   type: Phaser.AUTO,
-  parent: 'content',
+  parent: 'MainScene',
   width: 320 * 3,
   height: 240 * 3,
   zoom: 2,
@@ -9,7 +9,7 @@ const phaserConfig = {
     default: 'arcade',
     arcade: {
       gravity: { y: 0 },
-      debug: false
+      debug: true
     }
   }
 }
