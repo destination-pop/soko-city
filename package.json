@@ -8,7 +8,6 @@
   "main": "src/index.js",
   "scripts": {
     "build": "webpack -w",
-    "webpack": "webpack-dev-server",
     "start": "webpack -w & webpack-dev-server"
   },
   "keywords": [],
