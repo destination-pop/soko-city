@@ -1,9 +1,9 @@
 const phaserConfig = {
   type: Phaser.AUTO,
-  parent: 'MainScene',
-  width: 320 * 3,
-  height: 240 * 3,
-  zoom: 2,
+  parent: 'content',
+  width: 320 * 2,
+  height: 240 * 2,
+  zoom: 3,
   pixelArt: true,
   physics: {
     default: 'arcade',
