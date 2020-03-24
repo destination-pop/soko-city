@@ -3,7 +3,7 @@ const phaserConfig = {
   parent: 'content',
   width: 320 * 2,
   height: 240 * 2,
-  zoom: 2,
+  zoom: 3,
   pixelArt: true,
   physics: {
     default: 'arcade',

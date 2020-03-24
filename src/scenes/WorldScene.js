@@ -2,9 +2,9 @@ import Player from '../entity/Player'
 import InventoryItem from '../entity/InventoryItem'
 import { populateInventoryBar } from '../entity/utilityFunctions'
 
-var groundLayer
-var objectLayer
-var map
+let groundLayer
+let objectLayer
+let map
 
 export default class WorldScene extends Phaser.Scene {
   constructor() {
@@ -13,11 +13,7 @@ export default class WorldScene extends Phaser.Scene {
 
   preload() {
     //preload tileset
-    // this.load.image('tiles', 'assets/tileSets/sheet.png')
     this.load.image('tiles', 'assets/tileSets/overworld.png')
-
-    //preload map
-    // this.load.tilemapTiledJSON('map', 'assets/maps/map.json')
 
     //preload player sprite
     this.load.spritesheet('player', 'assets/sprites/playerSprites.png', {
@@ -41,27 +37,18 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   create() {
-    //creating static map and obstacle layers
-    // const map = this.make.tilemap({ key: 'map' })
-
-    // const tiles = map.addTilesetImage('spritesheet', 'tiles')
-    // const grass = map.createStaticLayer('Grass', tiles, 0, 0)
-    // const obstacles = map.createStaticLayer('Obstacles', tiles, 0, 0)
-
+    //setting up dynamic map and object layers
     map = this.make.tilemap({
       tileWidth: 16,
       tileHeight: 16,
-      width: 23,
-      height: 17
+      width: 75,
+      height: 75
     })
 
     var tiles = map.addTilesetImage('tiles')
 
     groundLayer = map.createBlankDynamicLayer('Ground Layer', tiles)
     objectLayer = map.createBlankDynamicLayer('Object Layer', tiles)
-    // groundLayer.setScale(2)
-    // objectLayer.setScale(2)
-
 
     // Walls & corners of the room
     groundLayer.fill(1, 0, 0, map.width, 1)
@@ -73,19 +60,9 @@ export default class WorldScene extends Phaser.Scene {
     groundLayer.putTileAt(44, map.width - 1, map.height - 1)
     groundLayer.putTileAt(42, 0, map.height - 1)
 
-    randomizeRoom() // Initial randomization
-    this.input.on('pointerdown', randomizeRoom)
-
-    // var help = this.add.text(16, 16, 'Click to re-randomize.', {
-    //   fontSize: '18px',
-    //   padding: { x: 10, y: 5 },
-    //   backgroundColor: '#ffffff',
-    //   fill: '#000000'
-    // })
-    // help.setScrollFactor(0)
-
-    //establishing collision rules for obstacle layer
-    // obstacles.setCollisionByExclusion([-1])
+    randomizeWorld() // Initial randomization
+    // un-comment below to randomize world on-click
+    // this.input.on('pointerdown', randomizeWorld)
 
     //adding player
     this.player = new Player(this, 50, 100, 'player')
@@ -105,7 +82,9 @@ export default class WorldScene extends Phaser.Scene {
     this.physics.world.bounds.height = map.heightInPixels
 
     //setting collision rules for player
-    // this.physics.add.collider(this.player, obstacles)
+    this.physics.add.collider(this.player, objectLayer) //blocks off trees
+    this.physics.add.collider(this.player, groundLayer) //block off the edges
+
     this.physics.add.overlap(
       this.player,
       this.inventoryItems.cookie,
@@ -120,7 +99,11 @@ export default class WorldScene extends Phaser.Scene {
       null,
       this
     )
+
+    //blocking off the edges
     this.player.setCollideWorldBounds(true)
+    objectLayer.setCollisionByExclusion([-1])
+    groundLayer.setCollisionByExclusion([22, 45, 46])
 
     //setting camera
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels)
@@ -197,25 +180,18 @@ export default class WorldScene extends Phaser.Scene {
   }
 }
 
-function randomizeRoom() {
+function randomizeWorld() {
   // Fill the floor with random ground tiles
   groundLayer.weightedRandomize(1, 1, map.width - 2, map.height - 2, [
-    { index: 45, weight: 4 }, // Regular floor tile (4x more likely)
-    { index: 46, weight: 1 }, // Tile variation with 1 rock
-    // { index: 8, weight: 1 }, // Tile variation with 1 rock
-    // { index: 26, weight: 1 } // Tile variation with 1 rock
+    { index: 22, weight: 10 }, // Regular grass
+    { index: 45, weight: 1 }, // One leaf
+    { index: 46, weight: 1 } // Two leaves
   ])
 
-  // Fill the floor of the room with random, weighted tiles
+  // Fill the floor with random, weighted tiles
   objectLayer.weightedRandomize(1, 1, map.width - 2, map.height - 2, [
-    { index: -1, weight: 50 }, // Place an empty tile most of the tile
+    { index: -1, weight: 50 }, // Empty tile
     { index: 91, weight: 3 }, // Big Tree
-    { index: 112, weight: 2 }, // Small Tree
-    // { index: 127, weight: 1 }, // Open crate
-    // { index: 108, weight: 1 }, // Empty crate
-    // { index: 109, weight: 2 }, // Open barrel
-    // { index: 110, weight: 2 }, // Empty barrel
-    // { index: 166, weight: 0.25 }, // Chest
-    // { index: 167, weight: 0.25 } // Trap door
+    { index: 112, weight: 2 } // Small Tree
   ])
 }
