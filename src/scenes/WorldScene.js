@@ -1,6 +1,8 @@
 import Player from '../entity/Player'
 import InventoryItem from '../entity/InventoryItem'
 import {populateInventoryBar} from '../entity/utilityFunctions'
+import puzzle from '../puzzles/generator'
+
 
 export default class WorldScene extends Phaser.Scene {
   constructor() {
@@ -67,7 +69,7 @@ export default class WorldScene extends Phaser.Scene {
 
     //setting collision rules for player
     this.physics.add.collider(this.player, obstacles)
-    this.physics.add.overlap(this.player, this.inventoryItems.cookie, this.pickUpItem, null, this)
+    this.physics.add.overlap(this.player, this.inventoryItems.cookie, this.tempLogging, null, this)
     this.physics.add.overlap(this.player, this.inventoryItems.avocado, this.pickUpItem, null, this)
     this.player.setCollideWorldBounds(true)
 
@@ -83,6 +85,11 @@ export default class WorldScene extends Phaser.Scene {
 
     //animating sprite motion
     this.createAnimations()
+  }
+
+  tempLogging() {
+    console.log('puzzle: ', puzzle.data)
+    // console.log('type: ', typeof puzzle)
   }
 
   //callback for player/inventory item overlap
