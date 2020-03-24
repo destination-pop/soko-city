@@ -45,8 +45,8 @@ export default class UIScene extends Phaser.Scene {
   populateInventoryBar(...items) {
     let currentX = 48
     items.forEach(item=>{
-      this.inventoryBar.create(currentX, 675,'graySquare').setScale(3)
-      this.inventoryBar.create(currentX, 675, item).setTint(0x696969).setScale(3)
+      this.inventoryBar.create(currentX, 450,'graySquare').setScale(3)
+      this.inventoryBar.create(currentX, 450, item).setTint(0x696969).setScale(3)
       currentX += 48
     })
   }
