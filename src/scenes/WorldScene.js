@@ -8,6 +8,8 @@ let map
 export default class WorldScene extends Phaser.Scene {
   constructor() {
     super('WorldScene')
+
+    
   }
 
   preload() {
@@ -66,9 +68,15 @@ export default class WorldScene extends Phaser.Scene {
 
     //adding the inventory items (sprinkled throughout the scene)
     //NOTE: There is a bug with collisions & static groups, so we create one by one
-    this.inventoryItems = {}
-    this.inventoryItems.cookie = new InventoryItem(this, 150, 70, 'cookie')
-    this.inventoryItems.avocado = new InventoryItem(this, 50, 260, 'avocado')
+    this.inventoryItems = this.physics.add.group({
+      classType: InventoryItem
+    })
+    // this.inventoryItems.cookie = new InventoryItem(this, 150, 70, 'cookie')
+    // this.inventoryItems.avocado = new InventoryItem(this, 50, 260, 'avocado')
+
+    this.randomizeItems()
+    // this.populateInventoryBar('UIScene', this.inventoryItems)
+
 
     //setting our world bounds
     this.physics.world.bounds.width = map.widthInPixels
@@ -80,18 +88,18 @@ export default class WorldScene extends Phaser.Scene {
 
     this.physics.add.overlap(
       this.player,
-      this.inventoryItems.cookie,
+      this.inventoryItems,
       this.pickUpItem,
       null,
       this
     )
-    this.physics.add.overlap(
-      this.player,
-      this.inventoryItems.avocado,
-      this.pickUpItem,
-      null,
-      this
-    )
+    // this.physics.add.overlap(
+    //   this.player,
+    //   this.inventoryItems.avocado,
+    //   this.pickUpItem,
+    //   null,
+    //   this
+    // )
 
     //blocking off the edges
     this.player.setCollideWorldBounds(true)
@@ -103,13 +111,24 @@ export default class WorldScene extends Phaser.Scene {
     this.cameras.main.startFollow(this.player)
 
     this.cameras.main.roundPixels = true
-    this.cameras.main.setZoom(3)
+    this.cameras.main.setZoom(2)
 
     //setting keyboard input for movement
     this.cursors = this.input.keyboard.createCursorKeys()
 
     //animating sprite motion
     this.createAnimations()
+  }
+
+  randomizeItems() {
+    for (let i = 0; i < 100; i++) {
+      let x = Phaser.Math.RND.between(0, map.widthInPixels);
+      let y = Phaser.Math.RND.between(0, map.heightInPixels);
+      let frame = Phaser.Math.RND.between(0, 64);
+      
+      let item = new InventoryItem(this, x, y, 'cookie', frame)
+      this.inventoryItems.add(item)
+    }
   }
 
   // callback for player/inventory item overlap

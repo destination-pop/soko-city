@@ -27,13 +27,13 @@ export default class UIScene extends Phaser.Scene {
 
     let currentGame = this.scene.get('WorldScene')
 
-    this.inventoryBar = this.physics.add.group({ classType: InventoryItem })
+    this.inventoryBar = this.add.group()
 
     this.populateInventoryBar('cookie','avocado')
 
     currentGame.events.on('itemAdded', function(item){
       this.inventoryBar.children.entries.forEach(el=>{
-        if (item.texture.key === el.texture.key) {
+        if (item.texture.key.frame === el.texture.key.frame) {
           el.clearTint()
         }
       })
