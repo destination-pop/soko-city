@@ -1,7 +1,7 @@
 import Player from '../entity/Player'
 import InventoryItem from '../entity/InventoryItem'
 import {populateInventoryBar} from '../entity/utilityFunctions'
-import puzzle from '../puzzles/generator'
+import {puzzle, puzzleConfig} from '../puzzles/converter'
 
 
 export default class WorldScene extends Phaser.Scene {
@@ -10,8 +10,9 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   preload() {
-    //preload tileset
+    //preload tilesets for map and puzzle map
     this.load.image('tiles', 'assets/tileSets/tileset.png')
+    this.load.image('puzzleTiles', 'assets/tileSets/puzzleTileset.png')
 
     //preload map
     this.load.tilemapTiledJSON('map', 'assets/maps/map.json')
