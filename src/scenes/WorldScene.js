@@ -1,18 +1,19 @@
 import Player from '../entity/Player'
 import InventoryItem from '../entity/InventoryItem'
-import {populateInventoryBar} from '../entity/utilityFunctions'
+import { populateInventoryBar } from '../entity/utilityFunctions'
+
+let groundLayer
+let objectLayer
+let map
 
 export default class WorldScene extends Phaser.Scene {
   constructor() {
-    super('WorldScene');
+    super('WorldScene')
   }
 
   preload() {
     //preload tileset
-    this.load.image('tiles', 'assets/tileSets/tileset.png')
-
-    //preload map
-    this.load.tilemapTiledJSON('map', 'assets/maps/map.json')
+    this.load.image('tiles', 'assets/tileSets/overworld.png')
 
     //preload player sprite
     this.load.spritesheet('player', 'assets/sprites/playerSprites.png', {
@@ -33,21 +34,35 @@ export default class WorldScene extends Phaser.Scene {
 
     //preload backgound color for the inventory bar
     this.load.image('graySquare', 'assets/sprites/graySquare.png')
-
   }
 
-
-
   create() {
+    //setting up dynamic map and object layers
+    map = this.make.tilemap({
+      tileWidth: 16,
+      tileHeight: 16,
+      width: 75,
+      height: 75
+    })
 
-    //creating static map and obstacle layers
-    const map = this.make.tilemap({ key: 'map' })
-    const tiles = map.addTilesetImage('spritesheet', 'tiles')
-    const grass = map.createStaticLayer('Grass', tiles, 0, 0)
-    const obstacles = map.createStaticLayer('Obstacles', tiles, 0, 0)
+    var tiles = map.addTilesetImage('tiles')
 
-    //establishing collision rules for obstacle layer
-    obstacles.setCollisionByExclusion([-1])
+    groundLayer = map.createBlankDynamicLayer('Ground Layer', tiles)
+    objectLayer = map.createBlankDynamicLayer('Object Layer', tiles)
+
+    // Walls & corners of the room
+    groundLayer.fill(1, 0, 0, map.width, 1)
+    groundLayer.fill(43, 0, map.height - 1, map.width, 1)
+    groundLayer.fill(21, 0, 0, 1, map.height)
+    groundLayer.fill(23, map.width - 1, 0, 1, map.height)
+    groundLayer.putTileAt(0, 0, 0)
+    groundLayer.putTileAt(2, map.width - 1, 0)
+    groundLayer.putTileAt(44, map.width - 1, map.height - 1)
+    groundLayer.putTileAt(42, 0, map.height - 1)
+
+    randomizeWorld() // Initial randomization
+    // un-comment below to randomize world on-click
+    // this.input.on('pointerdown', randomizeWorld)
 
     //adding player
     this.player = new Player(this, 50, 100, 'player')
@@ -59,22 +74,41 @@ export default class WorldScene extends Phaser.Scene {
     this.inventoryItems.avocado = new InventoryItem(this, 50, 260, 'avocado')
 
     //creating and populating the inventory bar
-    populateInventoryBar(this, 'cookie','avocado')
+    populateInventoryBar(this, 'cookie', 'avocado')
 
+    this.inventoryItems.cookie.setScrollFactor(0)
     //setting our world bounds
     this.physics.world.bounds.width = map.widthInPixels
     this.physics.world.bounds.height = map.heightInPixels
 
     //setting collision rules for player
-    this.physics.add.collider(this.player, obstacles)
-    this.physics.add.overlap(this.player, this.inventoryItems.cookie, this.pickUpItem, null, this)
-    this.physics.add.overlap(this.player, this.inventoryItems.avocado, this.pickUpItem, null, this)
-    this.player.setCollideWorldBounds(true)
+    this.physics.add.collider(this.player, objectLayer) //blocks off trees
+    this.physics.add.collider(this.player, groundLayer) //block off the edges
 
+    this.physics.add.overlap(
+      this.player,
+      this.inventoryItems.cookie,
+      this.pickUpItem,
+      null,
+      this
+    )
+    this.physics.add.overlap(
+      this.player,
+      this.inventoryItems.avocado,
+      this.pickUpItem,
+      null,
+      this
+    )
+
+    //blocking off the edges
+    this.player.setCollideWorldBounds(true)
+    objectLayer.setCollisionByExclusion([-1])
+    groundLayer.setCollisionByExclusion([22, 45, 46])
 
     //setting camera
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels)
     this.cameras.main.startFollow(this.player)
+
     this.cameras.main.roundPixels = true
     this.cameras.main.setZoom(3)
 
@@ -89,7 +123,7 @@ export default class WorldScene extends Phaser.Scene {
   pickUpItem(player, item) {
     item.disableBody(true, true)
     item.setVisible(false)
-    this.inventoryBar.children.entries.forEach(el=>{
+    this.inventoryBar.children.entries.forEach(el => {
       if (item.texture.key === el.texture.key) {
         el.clearTint()
       }
@@ -137,11 +171,27 @@ export default class WorldScene extends Phaser.Scene {
     this.anims.create({
       key: 'idle',
       frames: [{ key: 'player', frame: 3 }],
-      frameRate: 10,
+      frameRate: 10
     })
   }
 
   update(time, delta) {
     this.player.update(this.cursors)
   }
+}
+
+function randomizeWorld() {
+  // Fill the floor with random ground tiles
+  groundLayer.weightedRandomize(1, 1, map.width - 2, map.height - 2, [
+    { index: 22, weight: 10 }, // Regular grass
+    { index: 45, weight: 1 }, // One leaf
+    { index: 46, weight: 1 } // Two leaves
+  ])
+
+  // Fill the floor with random, weighted tiles
+  objectLayer.weightedRandomize(1, 1, map.width - 2, map.height - 2, [
+    { index: -1, weight: 50 }, // Empty tile
+    { index: 91, weight: 3 }, // Big Tree
+    { index: 112, weight: 2 } // Small Tree
+  ])
 }
