@@ -1,7 +1,7 @@
 import Player from '../entity/Player'
 import InventoryItem from '../entity/InventoryItem'
 import { populateInventoryBar } from '../entity/utilityFunctions'
-import { puzzleConfig } from '../puzzles/converter'
+import {puzzleConfig} from '../puzzles/converter'
 
 let groundLayer
 let objectLayer
@@ -40,36 +40,38 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   create() {
-    //setting up dynamic map and object layers
-    const map = this.make.tilemap(puzzleConfig)
-    const tiles = map.addTilesetImage('puzzleTiles')
-    const layer = map.createDynamicLayer(0,tiles,0,0)
+    //Setting up dynamic map and object layers for the overall map
+    map = this.make.tilemap({
+      tileWidth: 16,
+      tileHeight: 16,
+      width: 75,
+      height: 75
+    })
 
-    // map = this.make.tilemap({
-    //   tileWidth: 16,
-    //   tileHeight: 16,
-    //   width: 75,
-    //   height: 75
-    // })
+    var tiles = map.addTilesetImage('tiles')
 
-    // var tiles = map.addTilesetImage('tiles')
+    groundLayer = map.createBlankDynamicLayer('Ground Layer', tiles)
+    objectLayer = map.createBlankDynamicLayer('Object Layer', tiles)
 
-    // groundLayer = map.createBlankDynamicLayer('Ground Layer', tiles)
-    // objectLayer = map.createBlankDynamicLayer('Object Layer', tiles)
+    // Walls & corners of the room
+    groundLayer.fill(1, 0, 0, map.width, 1)
+    groundLayer.fill(43, 0, map.height - 1, map.width, 1)
+    groundLayer.fill(21, 0, 0, 1, map.height)
+    groundLayer.fill(23, map.width - 1, 0, 1, map.height)
+    groundLayer.putTileAt(0, 0, 0)
+    groundLayer.putTileAt(2, map.width - 1, 0)
+    groundLayer.putTileAt(44, map.width - 1, map.height - 1)
+    groundLayer.putTileAt(42, 0, map.height - 1)
 
-    // // Walls & corners of the room
-    // groundLayer.fill(1, 0, 0, map.width, 1)
-    // groundLayer.fill(43, 0, map.height - 1, map.width, 1)
-    // groundLayer.fill(21, 0, 0, 1, map.height)
-    // groundLayer.fill(23, map.width - 1, 0, 1, map.height)
-    // groundLayer.putTileAt(0, 0, 0)
-    // groundLayer.putTileAt(2, map.width - 1, 0)
-    // groundLayer.putTileAt(44, map.width - 1, map.height - 1)
-    // groundLayer.putTileAt(42, 0, map.height - 1)
-
-    // randomizeWorld() // Initial randomization
+    randomizeWorld() // Initial randomization
     // un-comment below to randomize world on-click
     // this.input.on('pointerdown', randomizeWorld)
+
+    //Creating the puzzle layer
+    const puzzleLayer = this.make.tilemap(puzzleConfig)
+    const puzzleTiles = puzzleLayer.addTilesetImage('puzzleTiles')
+    const puzzleBoxes = puzzleLayer.createDynamicLayer(0,puzzleTiles,0,0)
+    puzzleBoxes.setScale(0.25)
 
     //adding player
     this.player = new Player(this, 50, 100, 'player')
@@ -83,7 +85,6 @@ export default class WorldScene extends Phaser.Scene {
     //creating and populating the inventory bar
     populateInventoryBar(this, 'cookie', 'avocado')
 
-    this.inventoryItems.cookie.setScrollFactor(0)
     //setting our world bounds
     this.physics.world.bounds.width = map.widthInPixels
     this.physics.world.bounds.height = map.heightInPixels
