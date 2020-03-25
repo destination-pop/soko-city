@@ -1,6 +1,7 @@
 import Player from '../entity/Player'
 import InventoryItem from '../entity/InventoryItem'
 import { populateInventoryBar } from '../entity/utilityFunctions'
+import {puzzleConfig} from '../puzzles/converter'
 
 let groundLayer
 let objectLayer
@@ -12,8 +13,9 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   preload() {
-    // Preload tileset
+    //preload tilesets for map and puzzle map
     this.load.image('tiles', 'assets/tileSets/overworld.png')
+    this.load.image('puzzleTiles', 'assets/tileSets/puzzleTileset.png')
 
     // Preload player sprite
     this.load.spritesheet('player', 'assets/sprites/playerSprites.png', {
@@ -66,6 +68,13 @@ export default class WorldScene extends Phaser.Scene {
     // Otherwise, it will keep searching for a good spot
     this.randomizePlayerSpawn(4, 3)
 
+    //Creating the puzzle layer
+    const puzzleLayer = this.make.tilemap(puzzleConfig)
+    const puzzleTiles = puzzleLayer.addTilesetImage('puzzleTiles')
+    const puzzleBoxes = puzzleLayer.createDynamicLayer(0,puzzleTiles,0,0)
+    puzzleBoxes.setScale(0.25)
+
+ 
     // Adding the inventory items (sprinkled throughout the scene)
     // NOTE: There is a bug with collisions & static groups, so we create one by one
     this.inventoryItems = {}
@@ -75,6 +84,7 @@ export default class WorldScene extends Phaser.Scene {
     // Creating and populating the inventory bar
     populateInventoryBar(this, 'cookie', 'avocado')
 
+    //RENEE ISN'T SURE THIS IS NECESSARY!
     this.inventoryItems.cookie.setScrollFactor(0)
     // Setting our world bounds
     this.physics.world.bounds.width = map.widthInPixels
