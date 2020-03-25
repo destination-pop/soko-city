@@ -12,16 +12,16 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   preload() {
-    //preload tileset
+    // Preload tileset
     this.load.image('tiles', 'assets/tileSets/overworld.png')
 
-    //preload player sprite
+    // Preload player sprite
     this.load.spritesheet('player', 'assets/sprites/playerSprites.png', {
       frameWidth: 16,
       frameHeight: 16
     })
 
-    // preload inventory item sprites
+    // Preload inventory item sprites
     this.load.spritesheet('cookie', 'assets/sprites/foodSprites.png', {
       frameWidth: 16,
       frameHeight: 16
@@ -35,7 +35,7 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   create() {
-    //setting up dynamic map and object layers
+    // Setting up dynamic map and object layers
     map = this.make.tilemap({
       tileWidth: 16,
       tileHeight: 16,
@@ -48,7 +48,7 @@ export default class WorldScene extends Phaser.Scene {
     groundLayer = map.createBlankDynamicLayer('Ground Layer', tiles)
     objectLayer = map.createBlankDynamicLayer('Object Layer', tiles)
 
-    // Walls & corners of the room
+    // Edges of the map
     groundLayer.fill(1, 0, 0, map.width, 1)
     groundLayer.fill(43, 0, map.height - 1, map.width, 1)
     groundLayer.fill(21, 0, 0, 1, map.height)
@@ -58,12 +58,11 @@ export default class WorldScene extends Phaser.Scene {
     groundLayer.putTileAt(44, map.width - 1, map.height - 1)
     groundLayer.putTileAt(42, 0, map.height - 1)
 
-    randomizeWorld() // Initial randomization
-    // un-comment below to randomize world on-click
-    // this.input.on('pointerdown', randomizeWorld)
+    randomizeWorld() // Initial map randomization
 
-    //adding player
-    this.player = new Player(this, 50, 100, 'player')
+    // If 3x3 area around (4, 3) is empty, we'll spawn our player here
+    // Otherwise, it will keep searching for a good spot
+    this.randomizePlayerSpawn(4, 3)
 
     //adding the inventory items (sprinkled throughout the scene)
     //NOTE: There is a bug with collisions & static groups, so we create one by one
@@ -82,9 +81,9 @@ export default class WorldScene extends Phaser.Scene {
     this.physics.world.bounds.width = map.widthInPixels
     this.physics.world.bounds.height = map.heightInPixels
 
-    //setting collision rules for player
-    this.physics.add.collider(this.player, objectLayer) //blocks off trees
-    this.physics.add.collider(this.player, groundLayer) //block off the edges
+    // Setting collision rules for player
+    this.physics.add.collider(this.player, objectLayer) //Blocks off trees
+    this.physics.add.collider(this.player, groundLayer) //Blocks off the edges
 
     this.physics.add.overlap(
       this.player,
@@ -101,22 +100,22 @@ export default class WorldScene extends Phaser.Scene {
     //   this
     // )
 
-    //blocking off the edges
+    // Blocking off the edges
     this.player.setCollideWorldBounds(true)
     objectLayer.setCollisionByExclusion([-1])
     groundLayer.setCollisionByExclusion([22, 45, 46])
 
-    //setting camera
+    // Setting camera
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels)
     this.cameras.main.startFollow(this.player)
 
     this.cameras.main.roundPixels = true
     this.cameras.main.setZoom(2)
 
-    //setting keyboard input for movement
+    // Setting keyboard input for movement
     this.cursors = this.input.keyboard.createCursorKeys()
 
-    //animating sprite motion
+    // Animating sprite motion
     this.createAnimations()
   }
 
@@ -140,7 +139,7 @@ export default class WorldScene extends Phaser.Scene {
     this.events.emit('itemAdded', item)
   }
 
-  //creating animation sequence for player movement
+  //Creating animation sequence for player movement
   createAnimations() {
     this.anims.create({
       key: 'left',
@@ -188,6 +187,26 @@ export default class WorldScene extends Phaser.Scene {
   update(time, delta) {
     this.player.update(this.cursors)
   }
+  randomizePlayerSpawn(x, y) {
+    // Checks the 9 square area if it's clear to spawn in.
+    let collisionCheck = [
+      map.getTileAt(x - 1, y - 1, true, 'Object Layer').index,
+      map.getTileAt(x, y - 1, true, 'Object Layer').index,
+      map.getTileAt(x + 1, y - 1, true, 'Object Layer').index,
+      map.getTileAt(x - 1, y, true, 'Object Layer').index,
+      map.getTileAt(x, y, true, 'Object Layer').index,
+      map.getTileAt(x + 1, y, true, 'Object Layer').index,
+      map.getTileAt(x - 1, y + 1, true, 'Object Layer').index,
+      map.getTileAt(x, y + 1, true, 'Object Layer').index,
+      map.getTileAt(x + 1, y + 1, true, 'Object Layer').index
+    ]
+
+    if (collisionCheck.every(e => e === -1)) {
+      this.player = new Player(this, x * 16, y * 16, 'player')
+    } else {
+      this.randomizePlayerSpawn(x + 1, y + 1)
+    }
+  }
 }
 
 function randomizeWorld() {
@@ -204,4 +223,6 @@ function randomizeWorld() {
     { index: 91, weight: 3 }, // Big Tree
     { index: 112, weight: 2 } // Small Tree
   ])
+
+  // TODO: Clear out a rectangle of empty space
 }
