@@ -8,7 +8,6 @@ let map
 export default class WorldScene extends Phaser.Scene {
   constructor() {
     super('WorldScene')
-
     
   }
 
@@ -44,7 +43,7 @@ export default class WorldScene extends Phaser.Scene {
       height: 75
     })
 
-    var tiles = map.addTilesetImage('tiles')
+    const tiles = map.addTilesetImage('tiles')
 
     groundLayer = map.createBlankDynamicLayer('Ground Layer', tiles)
     objectLayer = map.createBlankDynamicLayer('Object Layer', tiles)
@@ -74,8 +73,9 @@ export default class WorldScene extends Phaser.Scene {
     // this.inventoryItems.cookie = new InventoryItem(this, 150, 70, 'cookie')
     // this.inventoryItems.avocado = new InventoryItem(this, 50, 260, 'avocado')
 
-    this.randomizeItems()
-    // this.populateInventoryBar('UIScene', this.inventoryItems)
+    //creating random items for scene and updating UI with items in scene
+    this.randomizeItems(this.inventoryItems, 100)
+    
 
 
     //setting our world bounds
@@ -120,15 +120,17 @@ export default class WorldScene extends Phaser.Scene {
     this.createAnimations()
   }
 
-  randomizeItems() {
-    for (let i = 0; i < 100; i++) {
+  randomizeItems(group, quantity) {
+    for (let i = 0; i < quantity; i++) {
       let x = Phaser.Math.RND.between(0, map.widthInPixels);
       let y = Phaser.Math.RND.between(0, map.heightInPixels);
-      let frame = Phaser.Math.RND.between(0, 64);
+      let frame = Phaser.Math.RND.between(0, 63);
       
       let item = new InventoryItem(this, x, y, 'cookie', frame)
-      this.inventoryItems.add(item)
+      group.add(item)
     }
+    const itemsInMap = group.children.entries.map(item => ({key: item.texture.key, frame: item.frame.name}))
+    this.events.emit('itemsInMap', itemsInMap)
   }
 
   // callback for player/inventory item overlap

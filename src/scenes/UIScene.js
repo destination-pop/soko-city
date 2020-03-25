@@ -29,7 +29,20 @@ export default class UIScene extends Phaser.Scene {
 
     this.inventoryBar = this.add.group()
 
-    this.populateInventoryBar('cookie','avocado')
+    // this.populateInventoryBar(['cookie'])
+
+    currentGame.events.on(
+      'itemsInMap',
+      function (items) {
+        let currentX = 48
+        items.forEach(item => {
+          this.inventoryBar.add(currentX, 450,'graySquare').setScale(3)
+          this.inventoryBar.add(currentX, 450, item.key, item.frame).setTint(0x696969).setScale(3)
+          currentX += 48
+        })
+      }, 
+      this)
+
 
     currentGame.events.on('itemAdded', function(item){
       this.inventoryBar.children.entries.forEach(el=>{
@@ -42,13 +55,13 @@ export default class UIScene extends Phaser.Scene {
   }
 
 
-  populateInventoryBar(...items) {
-    let currentX = 48
-    items.forEach(item=>{
-      this.inventoryBar.create(currentX, 450,'graySquare').setScale(3)
-      this.inventoryBar.create(currentX, 450, item).setTint(0x696969).setScale(3)
-      currentX += 48
-    })
-  }
+  // populateInventoryBar(items) {
+  //   let currentX = 48
+  //   items.forEach(item => {
+  //     this.inventoryBar.create(currentX, 450,'graySquare').setScale(3)
+  //     this.inventoryBar.create(currentX, 450, item.key, item.frame).setTint(0x696969).setScale(3)
+  //     currentX += 48
+  //   })
+  // }
 
 }
