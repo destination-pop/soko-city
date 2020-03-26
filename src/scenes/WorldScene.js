@@ -1,5 +1,6 @@
 import Player from '../entity/Player'
 import InventoryItem from '../entity/InventoryItem'
+import NPC from '../entity/NPC'
 
 let groundLayer
 let objectLayer
@@ -22,12 +23,12 @@ export default class WorldScene extends Phaser.Scene {
     })
 
     // Preload inventory item sprites
-    this.load.spritesheet('cookie', 'assets/sprites/foodSprites.png', {
+    this.load.spritesheet('food', 'assets/sprites/foodSprites.png', {
       frameWidth: 16,
       frameHeight: 16
     })
 
-    this.load.spritesheet('avocado', 'assets/sprites/foodSprites.png', {
+    this.load.spritesheet('villagers', '/assets/sprites/NPCvillagers.png', {
       frameWidth: 16,
       frameHeight: 16
     })
@@ -59,23 +60,26 @@ export default class WorldScene extends Phaser.Scene {
     groundLayer.putTileAt(42, 0, map.height - 1)
 
     randomizeWorld() // Initial map randomization
+    
+    //creating random items for scene and updating UI with items in scene
+
+    this.inventoryItems = this.physics.add.group({
+      classType: InventoryItem
+    })
+
+    this.randomizeItems(this.inventoryItems, 5)
+
+    //creating random villagers
+
+    this.villagers = this.physics.add.group({
+      classType: NPC
+    })
+
+    this.randomizeNPCs(this.villagers, 50)
 
     // If 3x3 area around (4, 3) is empty, we'll spawn our player here
     // Otherwise, it will keep searching for a good spot
     this.randomizePlayerSpawn(4, 3)
-
-    //adding the inventory items (sprinkled throughout the scene)
-    //NOTE: There is a bug with collisions & static groups, so we create one by one
-    this.inventoryItems = this.physics.add.group({
-      classType: InventoryItem
-    })
-    // this.inventoryItems.cookie = new InventoryItem(this, 150, 70, 'cookie')
-    // this.inventoryItems.avocado = new InventoryItem(this, 50, 260, 'avocado')
-
-    //creating random items for scene and updating UI with items in scene
-    this.randomizeItems(this.inventoryItems, 100)
-    
-
 
     //setting our world bounds
     this.physics.world.bounds.width = map.widthInPixels
@@ -84,6 +88,12 @@ export default class WorldScene extends Phaser.Scene {
     // Setting collision rules for player
     this.physics.add.collider(this.player, objectLayer) //Blocks off trees
     this.physics.add.collider(this.player, groundLayer) //Blocks off the edges
+    this.physics.add.collider(
+      this.player, 
+      this.villagers, 
+      this.startDialogue, 
+      null, 
+      this)
 
     this.physics.add.overlap(
       this.player,
@@ -92,13 +102,6 @@ export default class WorldScene extends Phaser.Scene {
       null,
       this
     )
-    // this.physics.add.overlap(
-    //   this.player,
-    //   this.inventoryItems.avocado,
-    //   this.pickUpItem,
-    //   null,
-    //   this
-    // )
 
     // Blocking off the edges
     this.player.setCollideWorldBounds(true)
@@ -117,6 +120,8 @@ export default class WorldScene extends Phaser.Scene {
 
     // Animating sprite motion
     this.createAnimations()
+
+    
   }
 
   randomizeItems(group, quantity) {
@@ -125,18 +130,36 @@ export default class WorldScene extends Phaser.Scene {
       let y = Phaser.Math.RND.between(0, map.heightInPixels);
       let frame = Phaser.Math.RND.between(0, 63);
       
-      let item = new InventoryItem(this, x, y, 'cookie', frame)
+      let item = new InventoryItem(this, x, y, 'food', frame)
       group.add(item)
     }
-    const itemsInMap = group.children.entries.map(item => ({key: item.texture.key, frame: item.frame.name}))
-    this.events.emit('itemsInMap', itemsInMap)
   }
 
-  // callback for player/inventory item overlap
+  randomizeNPCs(group, quantity) {
+    for (let i = 0; i < quantity; i++) {
+      let x = Phaser.Math.RND.between(0, map.widthInPixels);
+      let y = Phaser.Math.RND.between(0, map.heightInPixels);
+      let frame = Phaser.Math.RND.between(0, 8);
+      
+      let villager = new NPC(this, x, y, 'villagers', frame)
+      group.add(villager)
+    }
+  }
+
+  // callback for player/inventory item collision
   pickUpItem(player, item) {
     item.disableBody(true, true)
     item.setVisible(false)
-    this.events.emit('itemAdded', item)
+    this.events.emit('itemAdded', item.frame.name)
+  }
+
+  //callback for player/NPC overlap
+  startDialogue(player, villager) {
+    player.setVelocityX(0);
+    player.setVelocityY(0);
+    villager.setVelocityX(0);
+    villager.setVelocityY(0);
+    this.events.emit('villagerEncounter')
   }
 
   //Creating animation sequence for player movement
@@ -187,6 +210,7 @@ export default class WorldScene extends Phaser.Scene {
   update(time, delta) {
     this.player.update(this.cursors)
   }
+
   randomizePlayerSpawn(x, y) {
     // Checks the 9 square area if it's clear to spawn in.
     let collisionCheck = [
