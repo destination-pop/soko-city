@@ -3,6 +3,8 @@ import InventoryItem from '../entity/InventoryItem'
 import { populateInventoryBar } from '../entity/utilityFunctions'
 import {puzzleConfig, boxPuzzleLayer, wallPuzzleLayer, goalPuzzleLayer} from '../puzzles/converter'
 
+import {createUser} from '../server/routes'
+
 let groundLayer
 let objectLayer
 let map
@@ -90,7 +92,7 @@ export default class WorldScene extends Phaser.Scene {
     puzzleTiles = goals.addTilesetImage('puzzleTiles')
     const goalsForPuzzle = goals.createDynamicLayer(0,puzzleTiles,0,0)
     goalsForPuzzle.setScale(0.25)
- 
+
     // Adding the inventory items (sprinkled throughout the scene)
     // NOTE: There is a bug with collisions & static groups, so we create one by one
     this.inventoryItems = {}
@@ -147,6 +149,8 @@ export default class WorldScene extends Phaser.Scene {
 
   // Callback for player/inventory item overlap
   pickUpItem(player, item) {
+    //Jasmin's tests...
+    createUser('cody@email.com','123')
     item.disableBody(true, true)
     item.setVisible(false)
     this.inventoryBar.children.entries.forEach(el => {
