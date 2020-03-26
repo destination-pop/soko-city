@@ -1,8 +1,4 @@
-const COLOR_PRIMARY = 0x4e342e;
-const COLOR_LIGHT = 0x7b5e57;
-const COLOR_DARK = 0x260e04;
-
-const content = `Ah, you're the stranger looking for their pet chicken?  I'm afraid I can't help you until I solve this mysterious puzzle in my yard!  Could you help??  I would gladly repay you with a random food item!`;
+const content = `Ah, you're the stranger looking for their pet chicken?  I'm afraid I can't help you until I solve this mysterious puzzle in my yard!  Could you help me??  I would gladly repay you with a random food item!  `;
 
 export default class QuestScene extends Phaser.Scene {
 
@@ -17,9 +13,11 @@ export default class QuestScene extends Phaser.Scene {
       sceneKey: 'rexUI'
     });
 
-    this.load.image('nextPage', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/assets/images/arrow-down-left.png');
+    this.load.image('nextPage', 'assets/UI/arrow-down-left.png');
 
-    this.load.image('textBox', 'assets/textbox.png')
+    this.load.image('close', 'assets/UI/x.png')
+
+    this.load.image('textBox', 'assets/UI/textbox.png')
     
   }
 
@@ -33,7 +31,6 @@ export default class QuestScene extends Phaser.Scene {
         fixedHeight: 65,
       }).start(content, 50);
     }, this)
-
   }
 }
 
@@ -47,12 +44,13 @@ var createTextBox = function (scene, x, y, config) {
     x: x,
     y: y,
 
-    // background: scene.rexUI.add.roundRectangle(0, 0, 2, 2, 20, COLOR_PRIMARY).setStrokeStyle(2, COLOR_LIGHT),
     background: scene.add.image(x, y, 'textBox'),
 
     text: getBBcodeText(scene, wrapWidth, fixedWidth, fixedHeight).setTint(0x260e04),
 
-    action: scene.add.image(0, 0, 'nextPage').setTint(COLOR_LIGHT).setVisible(false).setScale(0.5),
+    action: scene.add.image(0, 0, 'nextPage').setTint(0x7b5e57).setVisible(false).setScale(0.5),
+
+    close: scene.add.image(0, 0, 'close').setVisible(false).setScale(0.5),
 
     space: {
       left: 20,
@@ -70,7 +68,7 @@ var createTextBox = function (scene, x, y, config) {
     .setInteractive()
 
     .on('pointerdown', function () {
-      var icon = this.getElement('action').setVisible(false);
+      const icon = this.getElement('action').setVisible(false);
       this.resetChildVisibleState(icon);
       if (this.isTyping) {
           this.stop(true);
@@ -82,7 +80,7 @@ var createTextBox = function (scene, x, y, config) {
     .on('pageend', function () {
       if (this.isLastPage) {
         return;
-      }
+    }
 
       var icon = this.getElement('action').setVisible(true);
       this.resetChildVisibleState(icon);
@@ -90,14 +88,13 @@ var createTextBox = function (scene, x, y, config) {
       var tween = scene.tweens.add({
         targets: icon,
         y: '+=30', // '+=100'
-        ease: 'Bounce', // 'Cubic', 'Elastic', 'Bounce', 'Back'
+        ease: 'Bounce',
         duration: 500,
-        repeat: 0, // -1: infinity
+        repeat: 0,
         yoyo: false
       });
     }, textBox)
-    //.on('type', function () {
-    //})
+
 
   return textBox;
 }

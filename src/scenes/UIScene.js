@@ -19,7 +19,7 @@ export default class UIScene extends Phaser.Scene {
 
     this.inventoryBar = this.add.group()
 
-    setTimeout(this.populateInventoryBar(currentGame.inventoryItems.children.entries), 8000)
+    setTimeout(this.populateInventoryBar(currentGame.inventoryItems.children.entries), 10000)
 
 
     currentGame.events.on('itemAdded', function(item){
