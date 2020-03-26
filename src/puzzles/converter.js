@@ -36,6 +36,7 @@ function addPerimeter(convertedPuzzle) {
    return convertedPuzzle
 }
 
+
 //Set config for how Phaser will process map file
 let puzzleConfig = {
   data: addPerimeter(converter(puzzle._data._data)),
@@ -44,6 +45,35 @@ let puzzleConfig = {
   //Note to self: might need to add 2 to height / width to account for walls surrounding puzzle
   width: puzzle._data._width,
   height: puzzle._data._height,
+};
+
+function extractLayer(data, value) {
+   let layer = [];
+   for (let i = 0; i < data.length; i++) {
+      let newRow = []; 
+      for (let j= 0; j < data[i].length; j++) {
+         if (data[i][j] === value) {
+            newRow.push(value)
+         } else {
+            newRow.push(-1)
+         }
+      }
+      layer.push(newRow)
+   }
+   return layer
 }
 
-export {puzzleConfig}
+let boxPuzzleLayer = {data: [], tileWidth: 64, tileHeight: 64, width: 9, height: 9 };
+let wallPuzzleLayer = {data: [], tileWidth: 64, tileHeight: 64, width: 9, height: 9 };
+let goalPuzzleLayer = {data: [], tileWidth: 64, tileHeight: 64, width: 9, height: 9 };
+
+
+boxPuzzleLayer['data'] = extractLayer(puzzleConfig.data, 28)
+
+wallPuzzleLayer['data'] = extractLayer(puzzleConfig.data, 12)
+
+goalPuzzleLayer['data'] = extractLayer(puzzleConfig.data, 9)
+
+export {puzzleConfig, boxPuzzleLayer, wallPuzzleLayer, goalPuzzleLayer}
+
+
