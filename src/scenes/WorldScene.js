@@ -2,10 +2,12 @@ import Player from '../entity/Player'
 import InventoryItem from '../entity/InventoryItem'
 import { populateInventoryBar } from '../entity/utilityFunctions'
 import {puzzleConfig, boxPuzzleLayer, wallPuzzleLayer, goalPuzzleLayer} from '../puzzles/converter'
+// import PuzzleCrate from '../../public/assets/sprites'
 
 let groundLayer
 let objectLayer
 let map
+
 
 export default class WorldScene extends Phaser.Scene {
   constructor() {
@@ -76,8 +78,9 @@ export default class WorldScene extends Phaser.Scene {
     //Creating the puzzle layer for the boxes to move
     const boxes = this.make.tilemap(boxPuzzleLayer)
     puzzleTiles = boxes.addTilesetImage('puzzleTiles')
-    const boxesForPuzzle = boxes.createDynamicLayer(0,puzzleTiles,0,0)
+    const boxesForPuzzle = boxes.createStaticLayer(0,puzzleTiles,0,0)
     boxesForPuzzle.setScale(0.25)
+    boxesForPuzzle.setVisible(false)
 
     //Creating the puzzle layer for goal for the boxes to move to
     const walls = this.make.tilemap(wallPuzzleLayer)
@@ -88,8 +91,15 @@ export default class WorldScene extends Phaser.Scene {
     //Creating the puzzle layer for the walls of the puzzle
     const goals = this.make.tilemap(goalPuzzleLayer)
     puzzleTiles = goals.addTilesetImage('puzzleTiles')
-    const goalsForPuzzle = goals.createDynamicLayer(0,puzzleTiles,0,0)
+    const goalsForPuzzle = goals.createStaticLayer(0,puzzleTiles,0,0)
     goalsForPuzzle.setScale(0.25)
+
+    //Creating the actual box layer for the puzzle -- as a sprite rather than a tile
+    // const createBoxSprites = () => {
+    //   this.boxTiles = this.getTiles((tile) => {
+    //     return tile.index > -1;
+    //   }, this.boxesForPuzzle);
+    // }
  
     // Adding the inventory items (sprinkled throughout the scene)
     // NOTE: There is a bug with collisions & static groups, so we create one by one
@@ -244,6 +254,5 @@ function randomizeWorld() {
   // Clear out a rectangle of empty space for sokoban puzzle (top left)
   objectLayer.fill(-1, 0, 0, 12, 12); //clear out any objects for collisions
   groundLayer.fill(85, 0, 0, 11, 11); //yellow tile for puzzlefor plain green: use 22 instead of 85
-
 
 }
