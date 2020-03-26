@@ -1,6 +1,7 @@
 import Player from '../entity/Player'
 import InventoryItem from '../entity/InventoryItem'
 import { populateInventoryBar } from '../entity/utilityFunctions'
+import {puzzleConfig, boxPuzzleLayer, wallPuzzleLayer, goalPuzzleLayer} from '../puzzles/converter'
 
 let groundLayer
 let objectLayer
@@ -12,8 +13,9 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   preload() {
-    // Preload tileset
+    //preload tilesets for map and puzzle map
     this.load.image('tiles', 'assets/tileSets/overworld.png')
+    this.load.image('puzzleTiles', 'assets/tileSets/puzzleTileset.png')
 
     // Preload player sprite
     this.load.spritesheet('player', 'assets/sprites/playerSprites.png', {
@@ -66,6 +68,29 @@ export default class WorldScene extends Phaser.Scene {
     // Otherwise, it will keep searching for a good spot
     this.randomizePlayerSpawn(4, 3)
 
+
+    //COMMENCING MAKING THE PUZZLE LAYERS:::
+    //naming puzzleTiles for referencing in creating the puzzle layers!
+    let puzzleTiles;
+
+    //Creating the puzzle layer for the boxes to move
+    const boxes = this.make.tilemap(boxPuzzleLayer)
+    puzzleTiles = boxes.addTilesetImage('puzzleTiles')
+    const boxesForPuzzle = boxes.createDynamicLayer(0,puzzleTiles,0,0)
+    boxesForPuzzle.setScale(0.25)
+
+    //Creating the puzzle layer for goal for the boxes to move to
+    const walls = this.make.tilemap(wallPuzzleLayer)
+    puzzleTiles = walls.addTilesetImage('puzzleTiles')
+    const wallsForPuzzle = walls.createDynamicLayer(0,puzzleTiles,0,0)
+    wallsForPuzzle.setScale(0.25)
+
+    //Creating the puzzle layer for the walls of the puzzle
+    const goals = this.make.tilemap(goalPuzzleLayer)
+    puzzleTiles = goals.addTilesetImage('puzzleTiles')
+    const goalsForPuzzle = goals.createDynamicLayer(0,puzzleTiles,0,0)
+    goalsForPuzzle.setScale(0.25)
+ 
     // Adding the inventory items (sprinkled throughout the scene)
     // NOTE: There is a bug with collisions & static groups, so we create one by one
     this.inventoryItems = {}
@@ -76,6 +101,7 @@ export default class WorldScene extends Phaser.Scene {
     populateInventoryBar(this, 'cookie', 'avocado')
 
     this.inventoryItems.cookie.setScrollFactor(0)
+
     // Setting our world bounds
     this.physics.world.bounds.width = map.widthInPixels
     this.physics.world.bounds.height = map.heightInPixels
@@ -83,6 +109,7 @@ export default class WorldScene extends Phaser.Scene {
     // Setting collision rules for player
     this.physics.add.collider(this.player, objectLayer) //Blocks off trees
     this.physics.add.collider(this.player, groundLayer) //Blocks off the edges
+    this.physics.add.collider(this.player, wallsForPuzzle)
 
     this.physics.add.overlap(
       this.player,
@@ -214,5 +241,9 @@ function randomizeWorld() {
     { index: 112, weight: 2 } // Small Tree
   ])
 
-  // TODO: Clear out a rectangle of empty space
+  // Clear out a rectangle of empty space for sokoban puzzle (top left)
+  objectLayer.fill(-1, 0, 0, 12, 12); //clear out any objects for collisions
+  groundLayer.fill(85, 0, 0, 11, 11); //yellow tile for puzzlefor plain green: use 22 instead of 85
+
+
 }
