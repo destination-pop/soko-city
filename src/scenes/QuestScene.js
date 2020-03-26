@@ -50,8 +50,6 @@ var createTextBox = function (scene, x, y, config) {
 
     action: scene.add.image(0, 0, 'nextPage').setTint(0x7b5e57).setVisible(false).setScale(0.5),
 
-    close: scene.add.image(0, 0, 'close').setVisible(false).setScale(0.5),
-
     space: {
       left: 20,
       right: 20,
@@ -73,14 +71,14 @@ var createTextBox = function (scene, x, y, config) {
       if (this.isTyping) {
           this.stop(true);
       } else {
-          this.typeNextPage();
+        this.typeNextPage();
       }
     }, textBox)
 
     .on('pageend', function () {
       if (this.isLastPage) {
         return;
-    }
+      }
 
       var icon = this.getElement('action').setVisible(true);
       this.resetChildVisibleState(icon);

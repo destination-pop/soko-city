@@ -1,9 +1,13 @@
+import {db} from '../config/firebaseConfig'
+
 export default class UIScene extends Phaser.Scene {
 
   constructor (){
     super('UIScene');
 
     this.populateInventoryBar = this.populateInventoryBar.bind(this)
+
+    this.saveData = this.saveData.bind(this)
 
   }
 
@@ -26,6 +30,7 @@ export default class UIScene extends Phaser.Scene {
       this.inventoryBar.children.entries.forEach(el => {
         if (item === el.frame.name) {
           el.clearTint()
+          this.saveData({email: 'marie@gmail.com', itemAdded: `${el.frame.name}`, text: `I just picked up item ${el.frame.name} while walking around soko-city woo woo this works`})
         }
       })
     }, this)
@@ -40,6 +45,19 @@ export default class UIScene extends Phaser.Scene {
       this.inventoryBar.create(currentX, 450, item.texture.key, item.frame.name).setTint(0x696969).setScale(3)
       currentX += 48
     })
+  }
+
+  saveData(inputObj) {
+    db.collection("users").doc(inputObj.email).set({
+      itemAdded: inputObj.itemAdded,
+      text: inputObj.text
+  }, { merge: true })
+  .then(function() {
+      console.log("Document successfully written!");
+  })
+  .catch(function(error) {
+      console.error("Error writing document: ", error);
+  });
   }
 
 }

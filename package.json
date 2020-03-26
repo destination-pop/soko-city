@@ -19,7 +19,8 @@
     "firebase-admin": "^8.10.0",
     "firebase-tools": "^7.15.1",
     "nodemon": "^2.0.2",
-    "phaser": "^3.22.0"
+    "phaser": "^3.22.0",
+    "sokoban-generator": "^1.1.5"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",
