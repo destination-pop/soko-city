@@ -1,11 +1,13 @@
 import 'phaser'
 import Player from '../entity/Player'
 import InventoryItem from '../entity/InventoryItem'
-import { populateInventoryBar } from '../entity/utilityFunctions'
+import { populateInventoryBar, loadNextLevel } from '../entity/utilityFunctions'
 import {puzzleConfig, boxPuzzleLayer, wallPuzzleLayer, goalPuzzleLayer} from '../puzzles/converter'
 import SokoBox from '../entity/SokoBox'
 import SokoGoal from '../entity/SokoGoal'
 import SokoWall from '../entity/SokoWall'
+
+// import {createUser, levelUp, retrieveUserLevel} from '../server/routes'
 
 let groundLayer
 let objectLayer
@@ -14,7 +16,12 @@ let map
 
 export default class WorldScene extends Phaser.Scene {
   constructor() {
-    super('WorldScene');
+    super('WorldScene')
+    this.levelConfig = {
+      level: 1,
+      mapHeight: 15,
+      mapWidth: 15
+    }
   }
 
   preload() {
@@ -58,6 +65,10 @@ export default class WorldScene extends Phaser.Scene {
 
     // Preload backgound color for the inventory bar
     this.load.image('graySquare', 'assets/sprites/graySquare.png')
+
+    //Load player level
+    //NOTE: this will not be static eventually
+    // this.levelConfig = setLevelConfig(2)
   }
 
   create() {
@@ -65,8 +76,8 @@ export default class WorldScene extends Phaser.Scene {
     map = this.make.tilemap({
       tileWidth: 16,
       tileHeight: 16,
-      width: 75,
-      height: 75
+      width: this.levelConfig.mapWidth,
+      height: this.levelConfig.mapHeight
     })
 
     const tiles = map.addTilesetImage('tiles')
@@ -97,6 +108,7 @@ export default class WorldScene extends Phaser.Scene {
     //naming puzzleTiles for referencing in creating the puzzle layers!
     let puzzleTiles;
 
+<<<<<<< HEAD
     //creating sokoban puzzle sprites' physics group:
     this.sokoBoxes = this.physics.add.group({
       classType: SokoBox
@@ -117,11 +129,12 @@ export default class WorldScene extends Phaser.Scene {
     this.createSokoGoalSprite(this.sokoGoals)
     this.createSokoWallSprite(this.sokoWalls)
  
+
     // Adding the inventory items (sprinkled throughout the scene)
     // NOTE: There is a bug with collisions & static groups, so we create one by one
     this.inventoryItems = {}
     this.inventoryItems.cookie = new InventoryItem(this, 130, 70, 'cookie')
-    this.inventoryItems.avocado = new InventoryItem(this, 50, 260, 'avocado')
+    this.inventoryItems.avocado = new InventoryItem(this, 50, 150, 'avocado')
 
     // Creating and populating the inventory bar
     populateInventoryBar(this, 'cookie', 'avocado')
@@ -232,6 +245,9 @@ export default class WorldScene extends Phaser.Scene {
         el.clearTint()
       }
     })
+    //The code below restarts the scene at the next level-------------
+    console.log('Level Completed: ', this.currentLevel)
+    loadNextLevel(this)
   }
 
   //Callback for moving box
