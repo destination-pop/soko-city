@@ -1,29 +1,66 @@
+//THIS IS JASMIN'S TEST FILE
+
+/*
+
+// export const db = firebase.firestore();
+import {db, Auth} from '../config/firebaseConfig'
+
 // const Auth = firebase.auth();
-// const db = firebase.database();
-// const gamesRef = dbRef.ref('games')
-// const usersRef = dbRef.ref('users')
+//Note: Doc Ids are the user's email
+const games = db.collection('games')
+const users = db.collection('users')
 // const auth = null;
 
-import {Auth, db, gamesRef, usersRef, auth} from '../config/firebaseConfig'
 
-
-// // Register a new user
-// Auth.createUserWithEmailAndPassword(email, password)
-//  .catch(function (err) {
-//    // Handle errors
-//  });
-
-//OR
-
-async function createUser(email, pswd) {
-  try {
-    await Auth.createUserWithEmailAndPassword(email, password)
-    console.log('success')
-    return 'Success'
-  } catch (error) {
-    console.log('Error creating new user: ',error)
-  }
+//--------------------- Save User's Inventory Data -------------------
+function saveInventory(inputObj) {
+  db.collection("users").doc(inputObj.email).set({
+    itemAdded: inputObj.itemAdded,
+    text: inputObj.text
+  }, { merge: true })
+  .then(function() {
+      console.log("Document successfully written!");
+  })
+  .catch(function(error) {
+    console.error("Error writing document: ", error);
+  })
 }
+
+//---------------- Retrieve Existing User's Game Data ----------------
+
+//----------------------- Register a New User ------------------------
+function createUser(email, password) {
+  Auth.createUserWithEmailAndPassword(email, password)
+   .catch(function (err) {
+     console.log('Error: ', error)
+   })
+}
+
+function levelUp(email, newLevel) {
+  games.doc(email).update({
+    level: newLevel
+  })
+  .then(function() {
+    console.log('Successfully leveled up!')
+  })
+  .catch(function(error) {
+    console.error("Error with leveling up: ", error);
+  })
+}
+
+function retrieveUserLevel(email) {
+  games.doc(email).get(level)
+  .then(function() {
+    console.log('Successfully retrieved users level!')
+  })
+  .catch(function(error) {
+    console.error("Error with retrieving level: ", error);
+  })
+}
+
+// function completeGame() {
+
+// }
 
 // // Sign in existing user
 // Auth.signInWithEmailAndPassword(email, password)
@@ -58,7 +95,7 @@ async function createUser(email, pswd) {
 //  });
 
 
-/*
+
 ngOnInit() {
   firebase.initializeApp({
     apiKey: 'AIzaSyDrDLZzjnDLYd7bLIBzdBqT9U219MBej8g',
@@ -87,8 +124,22 @@ ngOnDestroy() {
   this.fbAuthSubscription.unsubscribe();
 }
 }
-*/
+
 
 export {
-  createUser
+  createUser,
+  levelUp,
+  retrieveUserLevel
 }
+
+// Uncaught TypeError: _config_firebaseConfig__WEBPACK_IMPORTED_MODULE_0__.default.ref is not a function
+//     at Module../src/server/routes.js (bundle.js:234901)
+//     at __webpack_require__ (bundle.js:20)
+//     at Module../src/scenes/WorldScene.js (bundle.js:234622)
+//     at __webpack_require__ (bundle.js:20)
+//     at Module../src/index.js (bundle.js:234353)
+//     at __webpack_require__ (bundle.js:20)
+//     at bundle.js:84
+//     at bundle.js:87
+
+*/
