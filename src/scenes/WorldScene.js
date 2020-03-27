@@ -1,8 +1,11 @@
+import 'phaser'
 import Player from '../entity/Player'
 import InventoryItem from '../entity/InventoryItem'
 import { populateInventoryBar } from '../entity/utilityFunctions'
 import {puzzleConfig, boxPuzzleLayer, wallPuzzleLayer, goalPuzzleLayer} from '../puzzles/converter'
-// import PuzzleCrate from '../../public/assets/sprites'
+import SokoBox from '../entity/SokoBox'
+import SokoGoal from '../entity/SokoGoal'
+import SokoWall from '../entity/SokoWall'
 
 let groundLayer
 let objectLayer
@@ -11,13 +14,30 @@ let map
 
 export default class WorldScene extends Phaser.Scene {
   constructor() {
-    super('WorldScene')
+    super('WorldScene');
   }
 
   preload() {
     //preload tilesets for map and puzzle map
     this.load.image('tiles', 'assets/tileSets/overworld.png')
-    this.load.image('puzzleTiles', 'assets/tileSets/puzzleTileset.png')
+
+    //Preload sokoBox sprite
+    this.load.spritesheet('sokoboxes', 'assets/sprites/puzzleCrate.png', {
+      frameWidth: 64,
+      frameHeight: 64
+    })
+
+    //Preload sokoGoal sprite
+    this.load.spritesheet('sokogoals', 'assets/sprites/puzzleEndpoint.png', {
+      frameWidth: 64,
+      frameHeight: 64
+    })
+
+    //Preload sokoWall sprite
+    this.load.spritesheet('sokowalls', 'assets/sprites/puzzleWall.png', {
+      frameWidth: 64,
+      frameHeight: 64
+    })
 
     // Preload player sprite
     this.load.spritesheet('player', 'assets/sprites/playerSprites.png', {
@@ -49,7 +69,7 @@ export default class WorldScene extends Phaser.Scene {
       height: 75
     })
 
-    var tiles = map.addTilesetImage('tiles')
+    const tiles = map.addTilesetImage('tiles')
 
     groundLayer = map.createBlankDynamicLayer('Ground Layer', tiles)
     objectLayer = map.createBlankDynamicLayer('Object Layer', tiles)
@@ -70,36 +90,32 @@ export default class WorldScene extends Phaser.Scene {
     // Otherwise, it will keep searching for a good spot
     this.randomizePlayerSpawn(4, 3)
 
+    //create container for puzzle
+    const container = this.add.container(0, 0)
 
-    //COMMENCING MAKING THE PUZZLE LAYERS:::
+    //Making Puzzle Sprites:
     //naming puzzleTiles for referencing in creating the puzzle layers!
     let puzzleTiles;
 
-    //Creating the puzzle layer for the boxes to move
-    const boxes = this.make.tilemap(boxPuzzleLayer)
-    puzzleTiles = boxes.addTilesetImage('puzzleTiles')
-    const boxesForPuzzle = boxes.createStaticLayer(0,puzzleTiles,0,0)
-    boxesForPuzzle.setScale(0.25)
-    boxesForPuzzle.setVisible(false)
+    //creating sokoban puzzle sprites' physics group:
+    this.sokoBoxes = this.physics.add.group({
+      classType: SokoBox
+    })
 
-    //Creating the puzzle layer for goal for the boxes to move to
-    const walls = this.make.tilemap(wallPuzzleLayer)
-    puzzleTiles = walls.addTilesetImage('puzzleTiles')
-    const wallsForPuzzle = walls.createDynamicLayer(0,puzzleTiles,0,0)
-    wallsForPuzzle.setScale(0.25)
 
-    //Creating the puzzle layer for the walls of the puzzle
-    const goals = this.make.tilemap(goalPuzzleLayer)
-    puzzleTiles = goals.addTilesetImage('puzzleTiles')
-    const goalsForPuzzle = goals.createStaticLayer(0,puzzleTiles,0,0)
-    goalsForPuzzle.setScale(0.25)
 
-    //Creating the actual box layer for the puzzle -- as a sprite rather than a tile
-    // const createBoxSprites = () => {
-    //   this.boxTiles = this.getTiles((tile) => {
-    //     return tile.index > -1;
-    //   }, this.boxesForPuzzle);
-    // }
+    this.sokoGoals = this.physics.add.group({
+      classType: SokoGoal
+    })
+
+    this.sokoWalls = this.physics.add.group({
+      classType: SokoWall
+    })
+
+    //Creating sokoBoxes, sokoGoals, and sokoWalls for puzzle
+    this.createSokoBoxSprite(this.sokoBoxes)
+    this.createSokoGoalSprite(this.sokoGoals)
+    this.createSokoWallSprite(this.sokoWalls)
  
     // Adding the inventory items (sprinkled throughout the scene)
     // NOTE: There is a bug with collisions & static groups, so we create one by one
@@ -119,7 +135,9 @@ export default class WorldScene extends Phaser.Scene {
     // Setting collision rules for player
     this.physics.add.collider(this.player, objectLayer) //Blocks off trees
     this.physics.add.collider(this.player, groundLayer) //Blocks off the edges
-    this.physics.add.collider(this.player, wallsForPuzzle)
+    this.physics.add.collider(this.player, this.sokoBoxes)
+    // this.physics.add.collider(this.player, this.sokoWalls)
+    // this.physics.add.collider(this.sokoBoxes, this.sokoWalls)
 
     this.physics.add.overlap(
       this.player,
@@ -135,6 +153,14 @@ export default class WorldScene extends Phaser.Scene {
       null,
       this
     )
+
+    // this.physics.add.overlap(
+    //   this.player,
+    //   this.sokoboxSprite,
+    //   this.moveBox,
+    //   null,
+    //   this
+    // )
 
     // Blocking off the edges
     this.player.setCollideWorldBounds(true)
@@ -155,6 +181,46 @@ export default class WorldScene extends Phaser.Scene {
     this.createAnimations()
   }
 
+//Utility fxns for creating sprites
+  createSokoBoxSprite(group) {
+    for (let i=0; i < 11; i++) {
+      for (let j=0; j < 11; j++) {
+        if (boxPuzzleLayer['data'][i][j] === 28) {
+          let sokoboxSprite = this.add.sprite(j*16+8, i*16+8, 'sokoboxes');
+          sokoboxSprite.setScale(0.25);
+          // sokoboxSprite.acceleration = 0;
+          // sokoboxSprite.allowDrag = true;
+
+          group.add(sokoboxSprite);
+        }
+      }
+    }
+  }
+
+  createSokoGoalSprite(group) {
+    for (let i=0; i < 11; i++) {
+      for (let j=0; j < 11; j++) {
+        if (goalPuzzleLayer['data'][i][j] === 9) {
+          let sokogoalSprite = this.add.sprite(j*16+8, i*16+8, 'sokogoals');
+          sokogoalSprite.setScale(0.25);
+          group.add(sokogoalSprite);
+        }
+      }
+    }
+  }
+
+  createSokoWallSprite(group) {
+    for (let i=0; i < 11; i++) {
+      for (let j=0; j < 11; j++) {
+        if (wallPuzzleLayer['data'][i][j] === 12) {
+          let sokowallSprite = this.add.sprite(j*16+8, i*16+8, 'sokowalls');
+          sokowallSprite.setScale(0.25);
+          group.add(sokowallSprite);
+        }
+      }
+    }
+  }
+
   // Callback for player/inventory item overlap
   pickUpItem(player, item) {
     item.disableBody(true, true)
@@ -165,6 +231,14 @@ export default class WorldScene extends Phaser.Scene {
       }
     })
   }
+
+  //Callback for moving box
+  // moveBox(sokoboxSprite) {
+  //   sokoboxSprite.stop()
+  //   sokoboxSprite.stop()
+  // }
+
+
 
   //Creating animation sequence for player movement
   createAnimations() {
@@ -256,3 +330,4 @@ function randomizeWorld() {
   groundLayer.fill(85, 0, 0, 11, 11); //yellow tile for puzzlefor plain green: use 22 instead of 85
 
 }
+
