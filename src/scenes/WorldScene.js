@@ -69,7 +69,7 @@ export default class WorldScene extends Phaser.Scene {
       classType: InventoryItem
     })
 
-    this.randomizeItems(this.inventoryItems, 5)
+    this.randomizeItems(this.inventoryItems, 1)
 
     //creating random villagers
 
@@ -77,7 +77,7 @@ export default class WorldScene extends Phaser.Scene {
       classType: NPC
     })
 
-    this.randomizeNPCs(this.villagers, 50)
+    this.randomizeNPCs(this.villagers, 1)
 
     // If 3x3 area around (4, 3) is empty, we'll spawn our player here
     // Otherwise, it will keep searching for a good spot
@@ -119,7 +119,7 @@ export default class WorldScene extends Phaser.Scene {
       this.startDialogue, 
       null, 
       this)
-    this.physics.add.collider(this.player, wallsForPuzzle)
+    // this.physics.add.collider(this.player, wallsForPuzzle)
 
     this.physics.add.overlap(
       this.player,
@@ -150,25 +150,34 @@ export default class WorldScene extends Phaser.Scene {
     
   }
 
-  randomizeItems(group, quantity) {
-    for (let i = 0; i < quantity; i++) {
-      let x = Phaser.Math.RND.between(0, map.widthInPixels);
-      let y = Phaser.Math.RND.between(0, map.heightInPixels);
+  randomizeItems(group, quantity) {  
+    let unique = []
+    while (unique.length < quantity) {
+      let x = Phaser.Math.RND.between(200, 300);
+      let y = Phaser.Math.RND.between(200, 300);
       let frame = Phaser.Math.RND.between(0, 63);
-      
-      let item = new InventoryItem(this, x, y, 'food', frame)
-      group.add(item)
+
+      if (unique.indexOf(frame) === -1) {
+        unique.push(frame)
+        let item = new InventoryItem(this, x, y, 'food', frame)
+        group.add(item)
+      }
     }
   }
+  
 
   randomizeNPCs(group, quantity) {
-    for (let i = 0; i < quantity; i++) {
-      let x = Phaser.Math.RND.between(0, map.widthInPixels);
-      let y = Phaser.Math.RND.between(0, map.heightInPixels);
+    let unique = [];
+    while (unique.length < quantity) {
+      let x = Phaser.Math.RND.between(200, 300);
+      let y = Phaser.Math.RND.between(200, 300);
       let frame = Phaser.Math.RND.between(0, 8);
-      
-      let villager = new NPC(this, x, y, 'villagers', frame)
-      group.add(villager)
+
+      if (unique.indexOf(frame) === -1) {
+        unique.push(frame)
+        let villager = new NPC(this, x, y, 'villagers', frame)
+        group.add(villager)
+      }
     }
   }
 
@@ -185,7 +194,7 @@ export default class WorldScene extends Phaser.Scene {
     player.setVelocityY(0);
     villager.setVelocityX(0);
     villager.setVelocityY(0);
-    this.events.emit('villagerEncounter')
+    this.events.emit('villagerEncounter', villager)
   }
 
   //Creating animation sequence for player movement
@@ -274,7 +283,7 @@ function randomizeWorld() {
     { index: 112, weight: 2 } // Small Tree
   ])
 
-  // Clear out a rectangle of empty space for sokoban puzzle (top left)
+  // // Clear out a rectangle of empty space for sokoban puzzle (top left)
   objectLayer.fill(-1, 0, 0, 12, 12); //clear out any objects for collisions
   groundLayer.fill(85, 0, 0, 11, 11); //yellow tile for puzzlefor plain green: use 22 instead of 85
 
