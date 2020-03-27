@@ -181,13 +181,14 @@ export default class WorldScene extends Phaser.Scene {
     this.createAnimations()
   }
 
-//Utility fxns for creating sprites
+//Utility fxns for creating puzzle sprites
   createSokoBoxSprite(group) {
     for (let i=0; i < 11; i++) {
       for (let j=0; j < 11; j++) {
         if (boxPuzzleLayer['data'][i][j] === 28) {
           let sokoboxSprite = this.add.sprite(j*16+8, i*16+8, 'sokoboxes');
           sokoboxSprite.setScale(0.25);
+          sokoboxSprite.moves = true;
           // sokoboxSprite.acceleration = 0;
           // sokoboxSprite.allowDrag = true;
 
@@ -215,6 +216,7 @@ export default class WorldScene extends Phaser.Scene {
         if (wallPuzzleLayer['data'][i][j] === 12) {
           let sokowallSprite = this.add.sprite(j*16+8, i*16+8, 'sokowalls');
           sokowallSprite.setScale(0.25);
+          sokowallSprite.immovable = true;
           group.add(sokowallSprite);
         }
       }
