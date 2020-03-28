@@ -30,32 +30,32 @@ function setLevelConfig(level) {
     case 1:
       return {
         level: 1,
-        mapWidth: 15,
-        mapHeight: 15
+        mapWidth: 40,
+        mapHeight: 40
       }
     case 2:
       return {
         level: 2,
-        mapWidth: 45,
-        mapHeight: 45
+        mapWidth: 50,
+        mapHeight: 50
       }
     case 3:
       return {
         level: 3,
-        mapWidth: 75,
-        mapHeight: 75
+        mapWidth: 60,
+        mapHeight: 60
       }
     case 4:
       return {
         level: 4,
-        mapWidth: 100,
-        mapHeight: 100
+        mapWidth: 70,
+        mapHeight: 70
       }
     case 5:
       return {
         level: 5,
-        mapWidth: 120,
-        mapHeight: 120
+        mapWidth: 80,
+        mapHeight: 80
       }
     }
 }
