@@ -7,23 +7,21 @@ class TitleScene extends Phaser.Scene {
   }
 
   preload() {
-    // this.load.image('background', 'images/background.jpg');
-    console.log('preloading the titlescene')
+    this.load.image('background', 'assets/sprites/titleBg.png');
 	}
 
 	create() {
-  //   const bg = this.add.sprite(0,0,'background');
-  //   bg.setOrigin(0,0);
-    this.add.text(320,100, 'SOKO-CITY');
+    const titleSceneBackground = this.add.sprite(0,0,'background');
+    titleSceneBackground.setOrigin(0,0);
+    this.add.text(120,100, 'SOKO-CITY', {fontSize: '70px'});
 
-    const text = this.add.text(320,200, 'Start!');
+    const text = this.add.text(220,320, 'start game', {fontSize: '30px'});
     text.setInteractive({ useHandCursor: true });
     text.on('pointerdown', () => this.handleClick());
 
 	}
 
   handleClick() {
-    console.log("in the handle click function")
     this.scene.start('WorldScene');
   }
 }

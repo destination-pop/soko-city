@@ -20,7 +20,6 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   preload() {
-    console.log('in the preload for worldscene')
     //preload tilesets for map and puzzle map
     this.load.image('tiles', 'assets/tileSets/overworld.png')
     this.load.image('puzzleTiles', 'assets/tileSets/puzzleTileset.png')
