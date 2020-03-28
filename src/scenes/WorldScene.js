@@ -27,6 +27,7 @@ export default class WorldScene extends Phaser.Scene {
   preload() {
     //preload tilesets for map and puzzle map
     this.load.image('tiles', 'assets/tileSets/overworld.png')
+    this.load.image('puzzleTiles', 'assets/tileSets/puzzleTileset.png')
 
     //Preload sokoBox sprite
     this.load.spritesheet('sokoboxes', 'assets/sprites/puzzleCrate.png', {
@@ -105,16 +106,10 @@ export default class WorldScene extends Phaser.Scene {
     const container = this.add.container(0, 0)
 
     //Making Puzzle Sprites:
-    //naming puzzleTiles for referencing in creating the puzzle layers!
-    let puzzleTiles;
-
-<<<<<<< HEAD
-    //creating sokoban puzzle sprites' physics group:
+    //Creating sokoban puzzle sprites' physics group:
     this.sokoBoxes = this.physics.add.group({
       classType: SokoBox
     })
-
-
 
     this.sokoGoals = this.physics.add.group({
       classType: SokoGoal
@@ -148,8 +143,12 @@ export default class WorldScene extends Phaser.Scene {
     // Setting collision rules for player
     this.physics.add.collider(this.player, objectLayer) //Blocks off trees
     this.physics.add.collider(this.player, groundLayer) //Blocks off the edges
-    this.physics.add.collider(this.player, this.sokoBoxes)
-    // this.physics.add.collider(this.player, this.sokoWalls)
+    this.physics.add.collider(this.player, this.sokoBoxes, this.moveBox, null, this) //Player can push the puzzle boxes
+    this.physics.add.collider(this.player, this.sokoWalls) //Player can't move through puzzle walls
+    // this.sokoBoxes.children.entries.forEach((sokobox) => {
+    //   this.physics.add.collider(sokobox, this.sokoWalls)
+    // })
+    // this.physics.add.collider(this.sokoBoxes, this.sokoWalls) //Blocks off sokoban puzzle boxes from moving through/ past puzzle walss
     // this.physics.add.collider(this.sokoBoxes, this.sokoWalls)
 
     this.physics.add.overlap(
@@ -166,14 +165,6 @@ export default class WorldScene extends Phaser.Scene {
       null,
       this
     )
-
-    // this.physics.add.overlap(
-    //   this.player,
-    //   this.sokoboxSprite,
-    //   this.moveBox,
-    //   null,
-    //   this
-    // )
 
     // Blocking off the edges
     this.player.setCollideWorldBounds(true)
@@ -199,13 +190,12 @@ export default class WorldScene extends Phaser.Scene {
     for (let i=0; i < 11; i++) {
       for (let j=0; j < 11; j++) {
         if (boxPuzzleLayer['data'][i][j] === 28) {
-          let sokoboxSprite = this.add.sprite(j*16+8, i*16+8, 'sokoboxes');
-          sokoboxSprite.setScale(0.25);
-          sokoboxSprite.moves = true;
-          // sokoboxSprite.acceleration = 0;
-          // sokoboxSprite.allowDrag = true;
-
-          group.add(sokoboxSprite);
+          let x = j * 16 + 8; //16 = tile size and 8 = offset
+          let y = i * 16 + 8; //16 = tile size and 8 = offset
+          let sokoBoxSprite = new SokoBox(this, x, y, 'sokoboxes');
+          sokoBoxSprite.setAcceleration(0,0); //only moves as much as it is pushed by the player
+          sokoBoxSprite.setScale(0.25);
+          group.add(sokoBoxSprite);
         }
       }
     }
@@ -215,9 +205,13 @@ export default class WorldScene extends Phaser.Scene {
     for (let i=0; i < 11; i++) {
       for (let j=0; j < 11; j++) {
         if (goalPuzzleLayer['data'][i][j] === 9) {
-          let sokogoalSprite = this.add.sprite(j*16+8, i*16+8, 'sokogoals');
-          sokogoalSprite.setScale(0.25);
-          group.add(sokogoalSprite);
+          let x = j * 16 + 8;
+          let y = i * 16 + 8;
+          let sokoGoalSprite = new SokoGoal(this, x, y, 'sokogoals');
+          sokoGoalSprite.body.immovable = true; //goal positions are not movable by the player
+          sokoGoalSprite.body.moves = false;
+          sokoGoalSprite.setScale(0.25);
+          group.add(sokoGoalSprite);
         }
       }
     }
@@ -227,10 +221,13 @@ export default class WorldScene extends Phaser.Scene {
     for (let i=0; i < 11; i++) {
       for (let j=0; j < 11; j++) {
         if (wallPuzzleLayer['data'][i][j] === 12) {
-          let sokowallSprite = this.add.sprite(j*16+8, i*16+8, 'sokowalls');
-          sokowallSprite.setScale(0.25);
-          sokowallSprite.immovable = true;
-          group.add(sokowallSprite);
+          let x = j * 16 + 8;
+          let y = i * 16 + 8;
+          let sokoWallSprite = new SokoWall(this, x, y, 'sokowalls');
+          sokoWallSprite.body.immovable = true;
+          sokoWallSprite.body.moves = false;
+          sokoWallSprite.setScale(0.25);
+          group.add(sokoWallSprite);
         }
       }
     }
@@ -251,12 +248,12 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   //Callback for moving box
-  // moveBox(sokoboxSprite) {
-  //   sokoboxSprite.stop()
-  //   sokoboxSprite.stop()
-  // }
-
-
+  moveBox(player, sokoBoxSprite) {
+    player.setVelocityX(0)
+    player.setVelocityY(0)
+    sokoBoxSprite.setVelocityX(0)
+    sokoBoxSprite.setVelocityY(0)
+  }
 
   //Creating animation sequence for player movement
   createAnimations() {
