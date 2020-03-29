@@ -63,13 +63,14 @@ window.onload = function () {
 }
 */
 
-import 'phaser';
-import phaserConfig from './config/phaserConfig'
-import { firebaseConfig } from './config/firebaseConfig'
-import MainScene from './scenes/MainScene'
-import WorldScene from './scenes/WorldScene'
-import TitleScene from './scenes/TitleScene'
-import TransitionScene from './scenes/TransitionScene'
+import 'phaser'
+import phaserConfig from '../config/phaserConfig'
+import { firebaseConfig } from '../config/firebaseConfig'
+import MainScene from '../scenes/MainScene'
+import WorldScene from '../scenes/WorldScene'
+import TitleScene from '../scenes/TitleScene'
+import TransitionScene from '../scenes/TransitionScene'
+import React from 'react'
 
 class phaserGame extends Phaser.Game {
   constructor() {

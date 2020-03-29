@@ -21,8 +21,8 @@ const options = {
   seed: Date.now(),
   // The initial position of player
   initialPosition: {
-    x: 0,
-    y: 0
+    x: 8,
+    y: 8
   },
   // the return type, either "string" or "class"
   type: "class"
