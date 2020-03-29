@@ -74,6 +74,7 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   create() {
+
     // Setting up dynamic map and object layers
     map = this.make.tilemap({
       tileWidth: 16,
@@ -289,7 +290,7 @@ export default class WorldScene extends Phaser.Scene {
 
     if (this.levelConfig.itemsAcquired.length === this.levelConfig.itemsToAcquire) {
       this.events.emit('levelComplete', this.levelConfig.level, item.frame.name)
-      console.log('Level Completed: ', this.currentLevel)
+      console.log('Level Completed: ', this.levelConfig.level)
       loadNextLevel(this)
     } else {
       this.events.emit('itemFound', item.frame.name)
