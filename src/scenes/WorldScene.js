@@ -1,6 +1,6 @@
 import Player from '../entity/Player'
 import InventoryItem from '../entity/InventoryItem'
-import { populateInventoryBar, loadNextLevel } from '../entity/utilityFunctions'
+import { populateInventoryBar, setLevelConfig } from '../entity/utilityFunctions'
 import {puzzleConfig, boxPuzzleLayer, wallPuzzleLayer, goalPuzzleLayer} from '../puzzles/converter'
 
 // import {createUser, levelUp, retrieveUserLevel} from '../server/routes'
@@ -17,6 +17,7 @@ export default class WorldScene extends Phaser.Scene {
       mapHeight: 15,
       mapWidth: 15
     }
+    this.transitionToNextLevel = this.transitionToNextLevel.bind(this)
   }
 
   preload() {
@@ -168,9 +169,18 @@ export default class WorldScene extends Phaser.Scene {
         el.clearTint()
       }
     })
-    //The code below restarts the scene at the next level-------------
+  }
+
+  //loads the transition scene leading to the next level scene
+  transitionToNextLevel() {
     console.log('Level Completed: ', this.currentLevel)
-    loadNextLevel(this)
+    scene.time.addEvent({
+      delay: 1500,
+      callback: () => {
+        this.levelConfig = setLevelConfig(this.levelConfig.level+1)
+        this.scene.restart() // IN PROGRESSSSSSSSSSSSSSSSSSS
+      }
+    })
   }
 
   //Creating animation sequence for player movement

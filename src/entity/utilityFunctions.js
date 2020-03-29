@@ -10,19 +10,6 @@ function populateInventoryBar(scene, ...items) {
   })
 }
 
-function loadNextLevel(scene) {
-  //Add any end-of-scene graphics HERE
-
-  // start the next level after 1.5 seconds
-  scene.time.addEvent({
-    delay: 1500,
-    callback: () => {
-      scene.levelConfig = setLevelConfig(scene.levelConfig.level+1)
-      scene.scene.restart()
-    }
-  })
-}
-
 
 //Sets levelConfig variables for a scene to load user's current level
 function setLevelConfig(level) {
@@ -63,5 +50,5 @@ function setLevelConfig(level) {
 
 export {
   populateInventoryBar,
-  loadNextLevel
+  setLevelConfig
 }
