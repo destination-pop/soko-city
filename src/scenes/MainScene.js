@@ -9,6 +9,8 @@ export default class MainScene extends Phaser.Scene {
     // this.scene.launch('WorldScene')
 
     //Start the scene with the title scene
-    this.scene.start('TitleScene')
+    this.scene.launch('WorldScene');
+    this.scene.launch('UIScene');
+    this.scene.bringToTop('UIScene')
   }
 }

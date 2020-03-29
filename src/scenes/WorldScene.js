@@ -2,6 +2,8 @@ import 'phaser'
 import Player from '../entity/Player'
 import InventoryItem from '../entity/InventoryItem'
 import { populateInventoryBar, setLevelConfig } from '../entity/utilityFunctions'
+import NPC from '../entity/NPC'
+import { loadNextLevel } from '../entity/utilityFunctions'
 import {puzzleConfig, boxPuzzleLayer, wallPuzzleLayer, goalPuzzleLayer} from '../puzzles/converter'
 import SokoBox from '../entity/SokoBox'
 import SokoGoal from '../entity/SokoGoal'
@@ -19,8 +21,11 @@ export default class WorldScene extends Phaser.Scene {
     super('WorldScene')
     this.levelConfig = {
       level: 1,
-      mapHeight: 15,
-      mapWidth: 15
+      itemsToAcquire: 3,
+      itemsAcquired: [],
+      NPC: 1,
+      mapHeight: 150,
+      mapWidth: 150,
     }
     this.transitionToNextLevel = this.transitionToNextLevel.bind(this)
   }
@@ -55,22 +60,19 @@ export default class WorldScene extends Phaser.Scene {
     })
 
     // Preload inventory item sprites
-    this.load.spritesheet('cookie', 'assets/sprites/foodSprites.png', {
+    this.load.spritesheet('food', 'assets/sprites/foodSprites.png', {
       frameWidth: 16,
       frameHeight: 16
     })
 
-    this.load.spritesheet('avocado', 'assets/sprites/foodSprites.png', {
+    this.load.spritesheet('villagers', '/assets/sprites/NPCvillagers.png', {
       frameWidth: 16,
       frameHeight: 16
     })
-
-    // Preload backgound color for the inventory bar
-    this.load.image('graySquare', 'assets/sprites/graySquare.png')
 
     //Load player level
     //NOTE: this will not be static eventually
-    // this.levelConfig = setLevelConfig(2)
+    //this.levelConfig = setLevelConfig(2)
   }
 
   create() {
@@ -102,9 +104,27 @@ export default class WorldScene extends Phaser.Scene {
 
     randomizeWorld() // Initial map randomization
 
+    //creating random items for scene and updating UI with items in scene
+
+    this.inventoryItems = this.physics.add.group({
+      classType: InventoryItem
+    })
+
+    this.randomizeItems(this.inventoryItems, this.levelConfig.itemsToAcquire)
+
+    //creating random villagers
+    this.villagers = this.physics.add.group({
+      classType: NPC,
+      immovable: true
+    })
+    this.villagers.enableBody = true;
+
+
+    this.randomizeNPCs(this.villagers, this.levelConfig.NPC)
+
     // If 3x3 area around (4, 3) is empty, we'll spawn our player here
     // Otherwise, it will keep searching for a good spot
-    this.randomizePlayerSpawn(4, 3)
+    this.randomizePlayerSpawn(15, 15)
 
     //create container for puzzle
     const container = this.add.container(0, 0)
@@ -127,18 +147,7 @@ export default class WorldScene extends Phaser.Scene {
     this.createSokoBoxSprite(this.sokoBoxes)
     this.createSokoGoalSprite(this.sokoGoals)
     this.createSokoWallSprite(this.sokoWalls)
- 
 
-    // Adding the inventory items (sprinkled throughout the scene)
-    // NOTE: There is a bug with collisions & static groups, so we create one by one
-    this.inventoryItems = {}
-    this.inventoryItems.cookie = new InventoryItem(this, 130, 70, 'cookie')
-    this.inventoryItems.avocado = new InventoryItem(this, 50, 150, 'avocado')
-
-    // Creating and populating the inventory bar
-    populateInventoryBar(this, 'cookie', 'avocado')
-
-    this.inventoryItems.cookie.setScrollFactor(0)
 
     // Setting our world bounds
     this.physics.world.bounds.width = map.widthInPixels
@@ -147,12 +156,19 @@ export default class WorldScene extends Phaser.Scene {
     // Setting collision rules for player
     this.physics.add.collider(this.player, objectLayer) //Blocks off trees
     this.physics.add.collider(this.player, groundLayer) //Blocks off the edges
+    this.physics.add.collider(
+      this.player,
+      this.villagers,
+      this.startDialogue,
+      null,
+      this)
+    // this.physics.add.collider(this.player, wallsForPuzzle)
     this.physics.add.collider(this.player, this.sokoBoxes, this.moveBox, null, this) //Player can push the puzzle boxes
     this.physics.add.collider(this.player, this.sokoWalls) //Player can't move through puzzle walls
-    
+
     //BOXES ARE STILL GOING THROUGH THE WALLS :(
     this.physics.add.collider(this.sokoBoxes, this.sokoWalls, this.boxesCantGoThruWalls, null, this)
-  
+
     // this.sokoBoxes.children.entries.map((sokobox) => {
     //   console.log('before:', sokobox)
     //   this.physics.add.overlap(sokobox, this.sokoWalls, this.boxesCantGoThruWalls, null, this)
@@ -162,14 +178,7 @@ export default class WorldScene extends Phaser.Scene {
 
     this.physics.add.overlap(
       this.player,
-      this.inventoryItems.cookie,
-      this.pickUpItem,
-      null,
-      this
-    )
-    this.physics.add.overlap(
-      this.player,
-      this.inventoryItems.avocado,
+      this.inventoryItems,
       this.pickUpItem,
       null,
       this
@@ -185,14 +194,49 @@ export default class WorldScene extends Phaser.Scene {
     this.cameras.main.startFollow(this.player)
 
     this.cameras.main.roundPixels = true
-    this.cameras.main.setZoom(3)
+    this.cameras.main.setZoom(2)
 
     // Setting keyboard input for movement
     this.cursors = this.input.keyboard.createCursorKeys()
 
     // Animating sprite motion
     this.createAnimations()
+
+
   }
+
+  randomizeItems(group, quantity) {
+    let unique = []
+    while (unique.length < quantity) {
+      let x = Phaser.Math.RND.between(200, 300);
+      let y = Phaser.Math.RND.between(200, 300);
+      let frame = Phaser.Math.RND.between(0, 63);
+
+      if (unique.indexOf(frame) === -1) {
+        unique.push(frame)
+        let item = new InventoryItem(this, x, y, 'food', frame)
+        group.add(item)
+      }
+    }
+    this.events.emit('newLevel')
+  }
+
+
+  randomizeNPCs(group, quantity) {
+    let unique = [];
+    while (unique.length < quantity) {
+      let x = Phaser.Math.RND.between(200, 300);
+      let y = Phaser.Math.RND.between(200, 300);
+      let frame = Phaser.Math.RND.between(0, 8);
+
+      if (unique.indexOf(frame) === -1) {
+        unique.push(frame)
+        let villager = new NPC(this, x, y, 'villagers', frame)
+        group.add(villager)
+      }
+    }
+  }
+
 
 //Utility fxns for creating puzzle sprites
   createSokoBoxSprite(group) {
@@ -242,17 +286,6 @@ export default class WorldScene extends Phaser.Scene {
     }
   }
 
-  // Callback for player/inventory item overlap
-  pickUpItem(player, item) {
-    item.disableBody(true, true)
-    item.setVisible(false)
-    this.inventoryBar.children.entries.forEach(el => {
-      if (item.texture.key === el.texture.key) {
-        el.clearTint()
-      }
-    })
-  }
-
   //loads the transition scene leading to the next level scene
   transitionToNextLevel() {
     console.log('Level Completed: ', this.currentLevel)
@@ -263,6 +296,39 @@ export default class WorldScene extends Phaser.Scene {
         this.scene.restart() // IN PROGRESSSSSSSSSSSSSSSSSSS
       }
     })
+  }
+
+  // Callback for player/inventory item overlap
+  pickUpItem(player, item) {
+  //   item.disableBody(true, true)
+  //   item.setVisible(false)
+  //   this.inventoryBar.children.entries.forEach(el => {
+  //     if (item.texture.key === el.texture.key) {
+  //       el.clearTint()
+  //     }
+  //   })
+  // }
+
+    this.levelConfig.itemsAcquired.push(item)
+
+    if (this.levelConfig.itemsAcquired.length === this.levelConfig.itemsToAcquire) {
+      this.events.emit('levelComplete', this.levelConfig.level, item.frame.name)
+      console.log('Level Completed: ', this.currentLevel)
+      loadNextLevel(this)
+    } else {
+      this.events.emit('itemFound', item.frame.name)
+    }
+
+    //launch itemAcquiredDialog on puzzle solve
+    // else {
+    //   this.events.emit('itemFromVillager', item.frame.name)
+    // }
+  }
+
+  //callback for player/NPC overlap
+  startDialogue(player, villager) {
+    this.events.emit('villagerEncounter', villager)
+
   }
 
   //Callback for moving box
@@ -329,6 +395,7 @@ export default class WorldScene extends Phaser.Scene {
   update(time, delta) {
     this.player.update(this.cursors)
   }
+
   randomizePlayerSpawn(x, y) {
     // Checks the 9 square area if it's clear to spawn in.
     let collisionCheck = [
@@ -366,7 +433,7 @@ function randomizeWorld() {
     { index: 112, weight: 2 } // Small Tree
   ])
 
-  // Clear out a rectangle of empty space for sokoban puzzle (top left)
+  // // Clear out a rectangle of empty space for sokoban puzzle (top left)
   objectLayer.fill(-1, 0, 0, 12, 12); //clear out any objects for collisions
   groundLayer.fill(85, 0, 0, 11, 11); //yellow tile for puzzlefor plain green: use 22 instead of 85
 
