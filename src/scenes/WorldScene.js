@@ -1,7 +1,10 @@
 import Player from '../entity/Player'
 import InventoryItem from '../entity/InventoryItem'
 import NPC from '../entity/NPC'
+import { loadNextLevel } from '../entity/utilityFunctions'
 import {puzzleConfig, boxPuzzleLayer, wallPuzzleLayer, goalPuzzleLayer} from '../puzzles/converter'
+
+// import {createUser, levelUp, retrieveUserLevel} from '../server/routes'
 
 let groundLayer
 let objectLayer
@@ -10,7 +13,14 @@ let map
 export default class WorldScene extends Phaser.Scene {
   constructor() {
     super('WorldScene')
-    
+    this.levelConfig = {
+      level: 1,
+      itemsToAcquire: 3,
+      itemsAcquired: [],
+      NPC: 1,
+      mapHeight: 150,
+      mapWidth: 150,
+    }
   }
 
   preload() {
@@ -35,6 +45,9 @@ export default class WorldScene extends Phaser.Scene {
       frameHeight: 16
     })
 
+    //Load player level
+    //NOTE: this will not be static eventually
+    //this.levelConfig = setLevelConfig(2)
   }
 
   create() {
@@ -42,8 +55,8 @@ export default class WorldScene extends Phaser.Scene {
     map = this.make.tilemap({
       tileWidth: 16,
       tileHeight: 16,
-      width: 75,
-      height: 75
+      width: this.levelConfig.mapWidth,
+      height: this.levelConfig.mapHeight
     })
 
     const tiles = map.addTilesetImage('tiles')
@@ -69,15 +82,17 @@ export default class WorldScene extends Phaser.Scene {
       classType: InventoryItem
     })
 
-    this.randomizeItems(this.inventoryItems, 1)
+    this.randomizeItems(this.inventoryItems, this.levelConfig.itemsToAcquire)
 
     //creating random villagers
-
     this.villagers = this.physics.add.group({
-      classType: NPC
+      classType: NPC,
+      immovable: true
     })
+    this.villagers.enableBody = true;
 
-    this.randomizeNPCs(this.villagers, 1)
+
+    this.randomizeNPCs(this.villagers, this.levelConfig.NPC)
 
     // If 3x3 area around (4, 3) is empty, we'll spawn our player here
     // Otherwise, it will keep searching for a good spot
@@ -163,6 +178,7 @@ export default class WorldScene extends Phaser.Scene {
         group.add(item)
       }
     }
+    this.events.emit('newLevel')
   }
   
 
@@ -185,16 +201,30 @@ export default class WorldScene extends Phaser.Scene {
   pickUpItem(player, item) {
     item.disableBody(true, true)
     item.setVisible(false)
-    this.events.emit('itemAdded', item.frame.name)
+    this.levelConfig.itemsAcquired.push(item)
+
+    if (this.levelConfig.itemsAcquired.length === this.levelConfig.itemsToAcquire) {
+      this.events.emit('levelComplete', this.levelConfig.level, item.frame.name)
+      console.log('Level Completed: ', this.currentLevel)
+      loadNextLevel(this)
+    } else {
+      this.events.emit('itemFound', item.frame.name)
+    }
+
+    //launch itemAcquiredDialog on puzzle solve
+    // else {
+    //   this.events.emit('itemFromVillager', item.frame.name)
+    // }
   }
 
   //callback for player/NPC overlap
   startDialogue(player, villager) {
-    player.setVelocityX(0);
-    player.setVelocityY(0);
-    villager.setVelocityX(0);
-    villager.setVelocityY(0);
     this.events.emit('villagerEncounter', villager)
+
+
+    //The code below restarts the scene at the next level-------------
+    // console.log('Level Completed: ', this.currentLevel)
+    // loadNextLevel(this)
   }
 
   //Creating animation sequence for player movement

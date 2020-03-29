@@ -1,9 +1,10 @@
 import * as firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/firestore";
+import { API_KEY } from '../../secrets.js'
 
 export const firebaseConfig = {
-  apiKey: process.env.API_KEY,
+  apiKey: API_KEY,
   authDomain: process.env.AUTH_DOMAIN,
   databaseURL: process.env.DATABASE_URL,
   projectId: "soko-city",
@@ -16,3 +17,4 @@ export const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 export const db = firebase.firestore();
+export const Auth = firebase.auth()

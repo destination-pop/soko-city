@@ -74,8 +74,12 @@ export default class UIScene extends Phaser.Scene {
 
     //initializing inventory bar
     this.inventoryBar = this.add.group()
-    
-    setTimeout(populateInventoryBar(this, currentGame.inventoryItems.children.entries, foodNames), 10000)
+
+    //launching text box for initial quest and populating inventory bar
+    currentGame.events.on('newLevel', function () {
+      populateInventoryBar(this, currentGame.inventoryItems.children.entries, foodNames)
+      textBox.setVisible(true).start(levelIntro(), 50)
+    }, this)
 
 
     //launching text box on villager encounter
@@ -84,12 +88,32 @@ export default class UIScene extends Phaser.Scene {
     }, this)
 
 
-    //updating inventory bar on item added, launching itemAddedDialog
-    currentGame.events.on('itemAdded', function(item){
+    //updating inventory bar on item acquired, launching itemAcquiredDialog
+    currentGame.events.on('itemFromVillager', function(item) {
       this.inventoryBar.children.entries.forEach(el => {
         if (item === el.frame.name) {
           el.clearTint()
-          textBox.setVisible(true).start(itemAddedDialog(currentGame, el.frame.name,foodNames))
+          textBox.setVisible(true).start(itemAcquiredDialog(currentGame, el.frame.name,foodNames), 50)
+        }
+      })
+    }, this)
+
+    //launching itemFoundDialog
+    currentGame.events.on('itemFound', function(item) {
+      this.inventoryBar.children.entries.forEach(el => {
+        if (item === el.frame.name) {
+          el.clearTint()
+          textBox.setVisible(true).start(itemFoundDialog(currentGame, el.frame.name,foodNames), 50)
+        }
+      })
+    }, this)
+
+    //launching text box on level complete
+    currentGame.events.on('levelComplete', function(level, item) {
+      this.inventoryBar.children.entries.forEach(el => {
+        if (item === el.frame.name) {
+          el.clearTint()
+          textBox.setVisible(true).start(levelCompleteDialog(currentGame, item, level, foodNames, levelNums), 50)
         }
       })
     }, this)
@@ -129,29 +153,29 @@ const foodNames = {
   2: 'stein of beer',
   3: 'moonshine',
   4: 'fancy spirit',
-  5: 'egg tart',
+  5: 'pineapple tart',
   6: 'sushi roll',
   7: 'california roll',
-  8: 'sake',
+  8: 'bottle of sake',
   9: 'roasted pig',
   10: 'jar of pickled apricots',
   11: 'jar of jelly',
-  12: 'apple',
+  12: 'delicious apple',
   13: 'fresh apple',
   14: 'turnip',
   15: 'potato',
-  16: 'eggy breakfast',
+  16: 'sunny breakfast',
   17: 'honeycomb',
   18: 'pineapple',
-  19: 'bacon',
+  19: 'piece of bacon',
   20: 'draft of beer',
   21: 'steak',
   22: 'bottle of wine',
   23: 'fish',
-  24: 'cheese',
+  24: 'wedge of cheese',
   25: 'turkey',
   26: 'baguette',
-  27: 'eggplant',
+  27: 'purple eggplant',
   28: 'red chili pepper',
   29: 'green chili pepper',
   30: 'macaroni',
@@ -190,6 +214,18 @@ const foodNames = {
   63: 'shrimp'
 }
 
+const levelNums = {
+  1: 'first',
+  2: 'second',
+  3: 'third',
+  4: 'fourth',
+  5: 'last'
+}
+
+const levelIntro = () => {
+  return `The village comptroller here has demanded a number of items!`
+}
+
 const initialVillagerDialog = (scene, villager, foodNames) => {
   let villagerNum = scene.villagers.children.entries.indexOf(villager)
   let inventoryNum = scene.inventoryItems.children.entries[villagerNum].frame.name
@@ -197,6 +233,15 @@ const initialVillagerDialog = (scene, villager, foodNames) => {
   return `Ah, you're the stranger looking for their pet chicken?  I'm afraid I can't do anything until I solve this mysterious puzzle in my yard!  Could you help me solve it??  I would gladly repay you with this ${foodNames[inventoryNum]}!`
 }
 
-const itemAddedDialog = (scene, foodItem, foodNames) => {
+const itemFromVillagerDialog = (scene, foodItem, foodNames) => {
   return `Thank you so much for solving this puzzle, you are brilliant!  Here is the ${foodNames[foodItem]} I promised you!`
+}
+
+const itemFoundDialog = (scene, foodItem, foodNames) => {
+  return `You found a ${foodNames[foodItem]}!`
+}
+
+const levelCompleteDialog = (scene, foodItem, level, foodNames, levelNums) => {
+  const nextLevel = levelNums[level + 1]
+  return `A ${foodNames[foodItem]}! You've collected all the items needed!  Time to continue your journey to the ${nextLevel} village!!!`
 }
