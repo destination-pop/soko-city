@@ -1,8 +1,8 @@
-'use strict';
+'use strict'
 
-const webpack = require('webpack');
-const path = require('path');
-require('dotenv').config({path: __dirname + '/.env'})
+const webpack = require('webpack')
+const path = require('path')
+require('dotenv').config({ path: __dirname + '/.env' })
 
 // const {
 //   NODE_ENV: mode
@@ -14,7 +14,6 @@ const devServer = {
 }
 
 module.exports = {
-
   // mode,
   mode: 'development',
 
@@ -43,11 +42,24 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader'
-        }
+        use: [
+          {
+            loader: 'babel-loader',
+            query: {
+              presets: ['@babel/preset-react']
+            }
+          },
+          // {
+          //   loader: 'style-loader'
+          // },
+          // {
+          //   loader: 'css-loader'
+          // },
+          // {
+          //   loader: 'sass-loader'
+          // }
+        ]
       }
     ]
   }
-
-};
+}
