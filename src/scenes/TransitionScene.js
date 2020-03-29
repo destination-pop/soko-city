@@ -1,8 +1,8 @@
 import 'phaser'
 
-class TitleScene extends Phaser.Scene {
+class TransitionScene extends Phaser.Scene {
   constructor() {
-    super('TitleScene');
+    super('TransitionScene');
     this.handleClick = this.handleClick.bind(this)
   }
 
@@ -22,20 +22,9 @@ class TitleScene extends Phaser.Scene {
 	}
 
   handleClick() {
-    this.cameras.main.fadeOut(500);
-
-    const startWorldScene = () => {
-      this.time.addEvent({
-        delay: 500,
-        callback: () => {
-          this.scene.start('WorldScene')
-        }
-      })
-    }
-
-    startWorldScene()
+    this.scene.start('????');
   }
 }
 
-export default TitleScene
+export default TransitionScene
 

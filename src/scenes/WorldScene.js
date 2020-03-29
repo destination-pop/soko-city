@@ -50,6 +50,9 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   create() {
+    //fade into the scene
+    this.cameras.main.fadeIn(500)
+
     // Setting up dynamic map and object layers
     map = this.make.tilemap({
       tileWidth: 16,
