@@ -21,8 +21,8 @@ function setLevelConfig(level) {
         itemsToAcquire: 3,
         itemsAcquired: 0,
         NPC: 1,
-        mapWidth: 15,
-        mapHeight: 15
+        mapWidth: 40,
+        mapHeight: 40
       }
     case 2:
       return {
@@ -30,8 +30,8 @@ function setLevelConfig(level) {
         itemsToAcquire: 4,
         itemsAcquired: 0,
         NPC: 2,
-        mapWidth: 45,
-        mapHeight: 45
+        mapWidth: 50,
+        mapHeight: 50
       }
     case 3:
       return {
