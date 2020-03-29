@@ -3,6 +3,8 @@ import phaserConfig from '../config/phaserConfig'
 import { firebaseConfig } from '../config/firebaseConfig'
 import MainScene from '../scenes/MainScene'
 import WorldScene from '../scenes/WorldScene'
+import UIScene from '../scenes/UIScene'
+import TitleScene from '../scenes/TitleScene'
 import React from 'react'
 
 class phaserGame extends Phaser.Game {
@@ -10,11 +12,13 @@ class phaserGame extends Phaser.Game {
     super(phaserConfig, firebaseConfig)
 
     //Add all the scenes
-    this.scene.add('WorldScene', WorldScene)
     this.scene.add('MainScene', MainScene)
+    this.scene.add('UIScene', UIScene)
+    this.scene.add('TitleScene', TitleScene)
+    this.scene.add('WorldScene', WorldScene)
 
     //Start the game with the main scene
-    this.scene.start('MainScene')
+    this.scene.start('TitleScene')
   }
 }
 

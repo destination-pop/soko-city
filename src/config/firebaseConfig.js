@@ -1,7 +1,7 @@
 import * as firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/firestore";
-import API_KEY from './secrets'
+import { API_KEY } from './secrets'
 
 export const firebaseConfig = {
   apiKey: API_KEY,
