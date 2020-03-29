@@ -145,11 +145,16 @@ export default class WorldScene extends Phaser.Scene {
     this.physics.add.collider(this.player, groundLayer) //Blocks off the edges
     this.physics.add.collider(this.player, this.sokoBoxes, this.moveBox, null, this) //Player can push the puzzle boxes
     this.physics.add.collider(this.player, this.sokoWalls) //Player can't move through puzzle walls
-    // this.sokoBoxes.children.entries.forEach((sokobox) => {
-    //   this.physics.add.collider(sokobox, this.sokoWalls)
+    
+    //BOXES ARE STILL GOING THROUGH THE WALLS :(
+    this.physics.add.collider(this.sokoBoxes, this.sokoWalls, this.boxesCantGoThruWalls, null, this)
+  
+    // this.sokoBoxes.children.entries.map((sokobox) => {
+    //   console.log('before:', sokobox)
+    //   this.physics.add.overlap(sokobox, this.sokoWalls, this.boxesCantGoThruWalls, null, this)
+    //   console.log('after:', sokobox);
     // })
     // this.physics.add.collider(this.sokoBoxes, this.sokoWalls) //Blocks off sokoban puzzle boxes from moving through/ past puzzle walss
-    // this.physics.add.collider(this.sokoBoxes, this.sokoWalls)
 
     this.physics.add.overlap(
       this.player,
@@ -249,6 +254,14 @@ export default class WorldScene extends Phaser.Scene {
 
   //Callback for moving box
   moveBox(player, sokoBoxSprite) {
+    player.setVelocityX(0)
+    player.setVelocityY(0)
+    sokoBoxSprite.setVelocityX(0)
+    sokoBoxSprite.setVelocityY(0)
+  }
+
+  //Callback for boxes not going through walls
+  boxesCantGoThruWalls(player, sokoBoxSprite) {
     player.setVelocityX(0)
     player.setVelocityY(0)
     sokoBoxSprite.setVelocityX(0)
