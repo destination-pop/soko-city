@@ -11,7 +11,8 @@ const phaserConfig = {
       gravity: { y: 0 },
       debug: true
     }
-  }
+  },
+  parent: 'phaser-game'
 }
 
 export default phaserConfig

@@ -14,13 +14,25 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@babel/preset-react": "^7.9.4",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "css-loader": "^3.4.2",
     "dotenv": "^8.2.0",
     "firebase": "^7.12.0",
     "firebase-admin": "^8.10.0",
     "firebase-tools": "^7.15.1",
+    "firebaseui": "^4.5.0",
+    "node-sass": "^4.13.1",
     "nodemon": "^2.0.2",
     "phaser": "^3.22.0",
-    "sokoban-generator": "^1.1.5"
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-firebaseui": "^4.1.0",
+    "react-router-dom": "^5.1.2",
+    "sass-loader": "^8.0.2",
+    "sokoban-generator": "^1.1.5",
+    "style-loader": "^1.1.3"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",
