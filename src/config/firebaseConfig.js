@@ -7,14 +7,14 @@ export const firebaseConfig = {
   apiKey: API_KEY,
   authDomain: process.env.AUTH_DOMAIN,
   databaseURL: process.env.DATABASE_URL,
-  projectId: "soko-city",
+  projectId: 'soko-city',
   storageBucket: process.env.STORAGE_BUCKET,
   messagingSenderId: process.env.MESSAGING_SENDER_ID,
   appId: process.env.APP_ID,
-  measurementId: process.env.MEASUREMENT_ID,
+  measurementId: process.env.MEASUREMENT_ID
 }
 
-firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig)
 
 export const db = firebase.firestore();
 export const Auth = firebase.auth()

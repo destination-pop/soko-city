@@ -1,24 +1,13 @@
-import 'phaser';
-import phaserConfig from './config/phaserConfig'
-import { firebaseConfig } from './config/firebaseConfig'
-import MainScene from './scenes/MainScene'
-import WorldScene from './scenes/WorldScene'
-import TitleScene from './scenes/TitleScene'
+import React from 'react'
+import ReactDOM from 'react-dom'
+import App from './components/app'
+import history from './history'
+import { Router } from 'react-router-dom'
 
-class Game extends Phaser.Game {
-  constructor() {
-    super(phaserConfig, firebaseConfig);
+ReactDOM.render(
+  <Router history={history}>
+    <App />
+  </Router>,
 
-    //Add all the scenes
-    this.scene.add('MainScene', MainScene)
-    this.scene.add('TitleScene', TitleScene)
-    this.scene.add('WorldScene', WorldScene)
-
-    //Start the game with the main scene
-    this.scene.start('MainScene')
-  }
-}
-
-window.onload = function () {
-  window.game = new Game();
-}
+  document.getElementById('app')
+)

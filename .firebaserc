@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "soko-city"
+    "default": "soko-city",
+    "soko-city": "soko-city"
   }
 }
