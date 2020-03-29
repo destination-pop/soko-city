@@ -124,7 +124,8 @@ export default class WorldScene extends Phaser.Scene {
 
     // If 3x3 area around (4, 3) is empty, we'll spawn our player here
     // Otherwise, it will keep searching for a good spot
-    this.randomizePlayerSpawn(15, 15)
+    this.randomizePlayerSpawn(4, 3)
+
 
     //create container for puzzle
     const container = this.add.container(0, 0)
@@ -313,7 +314,7 @@ export default class WorldScene extends Phaser.Scene {
 
     if (this.levelConfig.itemsAcquired.length === this.levelConfig.itemsToAcquire) {
       this.events.emit('levelComplete', this.levelConfig.level, item.frame.name)
-      console.log('Level Completed: ', this.currentLevel)
+      console.log('Level Completed: ', this.levelConfig.level)
       loadNextLevel(this)
     } else {
       this.events.emit('itemFound', item.frame.name)
@@ -412,6 +413,9 @@ export default class WorldScene extends Phaser.Scene {
 
     if (collisionCheck.every(e => e === -1)) {
       this.player = new Player(this, x * 16, y * 16, 'player')
+      this.player.body.width = 11
+      this.player.body.height = 11
+      this.player.body.setOffset(2.5, 1)
     } else {
       this.randomizePlayerSpawn(x + 1, y + 1)
     }
