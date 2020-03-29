@@ -19,7 +19,7 @@ function setLevelConfig(level) {
       return {
         level: 1,
         itemsToAcquire: 3,
-        itemsAcquired: 0,
+        itemsAcquired: [],
         NPC: 1,
         mapWidth: 40,
         mapHeight: 40
@@ -28,7 +28,7 @@ function setLevelConfig(level) {
       return {
         level: 2,
         itemsToAcquire: 4,
-        itemsAcquired: 0,
+        itemsAcquired: [],
         NPC: 2,
         mapWidth: 50,
         mapHeight: 50
@@ -37,7 +37,7 @@ function setLevelConfig(level) {
       return {
         level: 3,
         itemsToAcquire: 5,
-        itemsAcquired: 0,
+        itemsAcquired: [],
         NPC: 3,
         mapWidth: 75,
         mapHeight: 75
@@ -46,7 +46,7 @@ function setLevelConfig(level) {
       return {
         level: 4,
         itemsToAcquire: 6,
-        itemsAcquired: 0,
+        itemsAcquired: [],
         NPC: 4,
         mapWidth: 100,
         mapHeight: 100
@@ -55,7 +55,7 @@ function setLevelConfig(level) {
       return {
         level: 5,
         itemsToAcquire: 7,
-        itemsAcquired: 0,
+        itemsAcquired: [],
         NPC: 5,
         mapWidth: 120,
         mapHeight: 120
