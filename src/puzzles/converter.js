@@ -1,80 +1,76 @@
 import 'phaser'
 import puzzle from './generator'
 
+
+//------------------- Set Up Tile Index Associations ---------------------
 let wallIdx = 12
 let boxIdx = 28
 let goalIdx = 9
-let blankIdx = -1
+let blankIdx = -1 //will let floor show through
 let floorIdx = 13
 
-//Map over 2D puzzle array from generator to associate with correct tiles
-function converter(twoDimArray) {
-   return twoDimArray.map(row=>row.map(el=>{
-      if (el==='#') return wallIdx;
-      if (el==='$') return boxIdx;
-      if (el==='+' || el==='*' || el==='.') return goalIdx;
-      //Note: '+' indicates player on goal square
-      //Note: '*' indicates box on goal square,
-      //Note: '.' indicates goal square
-      else return blankIdx; //will let floor show through
-      //Note: Remaining chars are ' ' (floor space) and '@' (player)
+
+//------------------- Set Up Char Set Associations -----------------------
+const wallChars = {
+   '#': true    //Note: '#' indicates wall
+}
+const boxChars = {
+   '$': true,   //Note: '$' indicates box square
+   '*': true    //Note: '*' indicates box on goal square
+}
+const goalChars = {
+   '+': true,  //Note: '+' indicates player on goal square
+   '*': true,  //Note: '*' indicates box on goal square
+   '.': true   //Note: '.' indicates goal square
+}
+
+
+//----------- Convert 2D-Array to Single Layer w Perimeter ---------------
+function convertToSingleMapLayer(twoDimArray, charSet, tileIdx) {
+
+   //Map over puzzle to create single layer
+   let singleMapLayer = twoDimArray.map(row=>row.map(el=>{
+      if (charSet[el]) return tileIdx;
+      else return blankIdx;
    }))
-}
 
-//Add wall to the perimeter of the puzzle
-function addPerimeter(convertedPuzzle) {
-   let newRow = Array(convertedPuzzle.length-2).fill(wallIdx)
+   //Set tile index for the perimeter
+   let perimeterTileIdx = blankIdx
+   tileIdx === wallIdx ? perimeterTileIdx = wallIdx : null
 
-   convertedPuzzle.push(newRow)
-   convertedPuzzle.unshift(newRow.slice())
-   //Leave an opening for the player to enter puzzle
-   convertedPuzzle[convertedPuzzle.length-1][convertedPuzzle.length-2] = blankIdx
-
-   convertedPuzzle.forEach(row=>{
-      row.push(wallIdx)
-      row.unshift(wallIdx)
+   //Add perimeter to puzzle
+   singleMapLayer.push(Array(twoDimArray[0].length).fill(perimeterTileIdx))
+   singleMapLayer.unshift(Array(twoDimArray[0].length).fill(perimeterTileIdx))
+   singleMapLayer.forEach(row=>{
+      row.push(perimeterTileIdx)
+      row.unshift(perimeterTileIdx)
    })
-   return convertedPuzzle
-}
 
-
-//Set config for how Phaser will process map file
-let puzzleConfig = {
-  data: addPerimeter(converter(puzzle._data._data)),
-  tileWidth: 64,
-  tileHeight: 64,
-  //Note to self: might need to add 2 to height / width to account for walls surrounding puzzle
-  width: puzzle._data._width,
-  height: puzzle._data._height,
-};
-
-function extractLayer(data, value) {
-   let layer = [];
-   for (let i = 0; i < data.length; i++) {
-      let newRow = [];
-      for (let j= 0; j < data[i].length; j++) {
-         if (data[i][j] === value) {
-            newRow.push(value)
-         } else {
-            newRow.push(-1)
-         }
-      }
-      layer.push(newRow)
+   //If current layer is wall layer, add opening for player to enter
+   if (tileIdx === wallIdx) {
+      singleMapLayer[singleMapLayer.length-1][singleMapLayer[0].length-2] = blankIdx
    }
-   return layer
+   console.log(singleMapLayer, 'Tile Idx: wall=12,box=28,goal=9: ', tileIdx)
+   return singleMapLayer
 }
 
-let boxPuzzleLayer = {data: [], tileWidth: 64, tileHeight: 64, width: 9, height: 9 };
-let wallPuzzleLayer = {data: [], tileWidth: 64, tileHeight: 64, width: 9, height: 9 };
-let goalPuzzleLayer = {data: [], tileWidth: 64, tileHeight: 64, width: 9, height: 9 };
+//----------------- Set up Map Config Files for Phaser ---------------------
+let width = puzzle._data._width + 2 //+2 accounts for perimeter
+let height = puzzle._data._length + 2
+
+let boxPuzzleLayer = {data: [], tileWidth: 64, tileHeight: 64, width: width, height: height };
+let wallPuzzleLayer = {data: [], tileWidth: 64, tileHeight: 64, width: width, height: height };
+let goalPuzzleLayer = {data: [], tileWidth: 64, tileHeight: 64, width: width, height: height };
 
 
-boxPuzzleLayer['data'] = extractLayer(puzzleConfig.data, 28)
-
-wallPuzzleLayer['data'] = extractLayer(puzzleConfig.data, 12)
-
-goalPuzzleLayer['data'] = extractLayer(puzzleConfig.data, 9)
-
-export {puzzleConfig, boxPuzzleLayer, wallPuzzleLayer, goalPuzzleLayer}
+//----------------- Populate Config Files with Map Data ---------------------
+boxPuzzleLayer['data'] = convertToSingleMapLayer(puzzle._data._data, boxChars, boxIdx)
+wallPuzzleLayer['data'] = convertToSingleMapLayer(puzzle._data._data, wallChars, wallIdx)
+goalPuzzleLayer['data'] = convertToSingleMapLayer(puzzle._data._data, goalChars, goalIdx)
 
 
+export {
+   boxPuzzleLayer,
+   wallPuzzleLayer,
+   goalPuzzleLayer
+}
