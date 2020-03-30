@@ -3,7 +3,7 @@ import Player from '../entity/Player'
 import InventoryItem from '../entity/InventoryItem'
 import { populateInventoryBar, setLevelConfig } from '../entity/utilityFunctions'
 import NPC from '../entity/NPC'
-import { loadNextLevel } from '../entity/utilityFunctions'
+// import { loadNextLevel } from '../entity/utilityFunctions'
 import {puzzleConfig, boxPuzzleLayer, wallPuzzleLayer, goalPuzzleLayer} from '../puzzles/converter'
 import SokoBox from '../entity/SokoBox'
 import SokoGoal from '../entity/SokoGoal'
@@ -24,8 +24,14 @@ export default class WorldScene extends Phaser.Scene {
       itemsToAcquire: 3,
       itemsAcquired: [],
       NPC: 1,
-      mapHeight: 150,
-      mapWidth: 150,
+      mapHeight: 40,
+      mapWidth: 40,
+      puzzleOptions: {
+        width: 5,
+        height: 5,
+        boxes: 1,
+        minWalls: 3
+      }
     }
     this.transitionToNextLevel = this.transitionToNextLevel.bind(this)
   }
@@ -124,7 +130,7 @@ export default class WorldScene extends Phaser.Scene {
 
     // If 3x3 area around (4, 3) is empty, we'll spawn our player here
     // Otherwise, it will keep searching for a good spot
-    this.randomizePlayerSpawn(4, 3)
+    this.randomizePlayerSpawn(15, 15)
 
 
     //create container for puzzle
@@ -288,39 +294,35 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   //loads the transition scene leading to the next level scene
-  transitionToNextLevel() {
-    console.log('Level Completed: ', this.currentLevel)
-    scene.time.addEvent({
-      delay: 1500,
+  transitionToNextLevel(level) {
+    console.log(`Level ${level} Complete `)
+    this.cameras.main.fadeOut(500)
+    this.time.addEvent({
+      delay: 500,
       callback: () => {
         this.levelConfig = setLevelConfig(this.levelConfig.level+1)
-        this.scene.restart() // IN PROGRESSSSSSSSSSSSSSSSSSS
+        this.scene.start('TransitionScene');
+        // In progress, we can add other level-up activities here
       }
     })
   }
 
   // Callback for player/inventory item overlap
   pickUpItem(player, item) {
-  //   item.disableBody(true, true)
-  //   item.setVisible(false)
-  //   this.inventoryBar.children.entries.forEach(el => {
-  //     if (item.texture.key === el.texture.key) {
-  //       el.clearTint()
-  //     }
-  //   })
-  // }
+    item.disableBody(true, true)
+    item.setVisible(false)
 
     this.levelConfig.itemsAcquired.push(item)
 
     if (this.levelConfig.itemsAcquired.length === this.levelConfig.itemsToAcquire) {
       this.events.emit('levelComplete', this.levelConfig.level, item.frame.name)
       console.log('Level Completed: ', this.levelConfig.level)
-      loadNextLevel(this)
+      this.transitionToNextLevel(this.levelConfig.level)
     } else {
       this.events.emit('itemFound', item.frame.name)
     }
 
-    //launch itemAcquiredDialog on puzzle solve
+    // launch itemAcquiredDialog on puzzle solve
     // else {
     //   this.events.emit('itemFromVillager', item.frame.name)
     // }

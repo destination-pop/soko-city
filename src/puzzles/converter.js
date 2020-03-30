@@ -26,9 +26,9 @@ function addPerimeter(convertedPuzzle) {
    let newRow = Array(convertedPuzzle.length-2).fill(wallIdx)
 
    convertedPuzzle.push(newRow)
-   convertedPuzzle.unshift(newRow)
-   //Note: Leave an opening for the player to enter puzzle
-   convertedPuzzle[convertedPuzzle.length-3][convertedPuzzle.length-3] = blankIdx
+   convertedPuzzle.unshift(newRow.slice())
+   //Leave an opening for the player to enter puzzle
+   convertedPuzzle[convertedPuzzle.length-1][convertedPuzzle.length-2] = blankIdx
 
    convertedPuzzle.forEach(row=>{
       row.push(wallIdx)
