@@ -1,11 +1,11 @@
 import * as firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/firestore";
-import { API_KEY } from './secrets'
+import { API_KEY, AUTH_DOMAIN } from './secrets'
 
 export const firebaseConfig = {
   apiKey: API_KEY,
-  authDomain: process.env.AUTH_DOMAIN,
+  authDomain: AUTH_DOMAIN,
   databaseURL: process.env.DATABASE_URL,
   projectId: 'soko-city',
   storageBucket: process.env.STORAGE_BUCKET,
