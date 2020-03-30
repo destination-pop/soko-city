@@ -252,10 +252,7 @@ export default class WorldScene extends Phaser.Scene {
         if (boxPuzzleLayer['data'][i][j] === 28) {
           let x = j * 16 + 8; //16 = tile size and 8 = offset
           let y = i * 16 + 8; //16 = tile size and 8 = offset
-          let sokoBoxSprite = this.physics.add.image(x, y, 'sokoboxes');
-          sokoBoxSprite.enableBody = true
-          sokoBoxSprite.setFriction(10000, 10000)
-          sokoBoxSprite.body.setCollideWorldBounds(true)
+          let sokoBoxSprite = new SokoBox(this, x, y, 'sokoboxes')
           sokoBoxSprite.setScale(0.25);
           group.add(sokoBoxSprite);
         }
@@ -291,6 +288,22 @@ export default class WorldScene extends Phaser.Scene {
     }
   }
 
+  // updateBox(player, box) {
+  //   if (player.body.touching.left && box.body.touching.right) {
+  //     box.body.setVelocityX(0)
+  //     box.body.setVelocityY(0)
+  //   } else if (player.body.touching.right && box.body.touching.left) {
+  //     box.body.setVelocityX(0)
+  //     box.body.setVelocityY(0)
+  //   } else if (player.body.touching.up && box.body.touching.down) {
+  //     box.body.setVelocityY(0)
+  //     box.body.setVelocityX(0)
+  //   } else if (player.body.touching.down && box.body.touching.up) {
+  //     box.body.setVelocityY(0)
+  //     box.body.setVelocityX(0)
+  //   }
+  // }
+
   //loads the transition scene leading to the next level scene
   transitionToNextLevel(level) {
     console.log(`Level ${level} Complete `)
@@ -313,8 +326,7 @@ export default class WorldScene extends Phaser.Scene {
     this.levelConfig.itemsAcquired.push(item)
 
     if (this.levelConfig.itemsAcquired.length === this.levelConfig.itemsToAcquire) {
-      this.events.emit('levelComplete', this.levelConfig.level, item.frame.name)
-      console.log('Level Completed: ', this.levelConfig.level)
+      this.transitionToNextLevel(this.levelConfig.level)
     } else {
       this.events.emit('itemFound', item.frame.name)
     }
@@ -402,6 +414,11 @@ export default class WorldScene extends Phaser.Scene {
 
   update(time, delta) {
     this.player.update(this.cursors)
+
+    this.physics.world.collide(this.player, this.sokoBoxes, function () {
+      this.sokoBoxes.setVelocityX(0)
+      this.sokoBoxes.setVelocityY(0)
+    })
   }
 
 }

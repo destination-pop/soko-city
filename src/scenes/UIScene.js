@@ -60,7 +60,6 @@ export default class UIScene extends Phaser.Scene {
             this.stop(true);
         } else if (currentGame.levelConfig.itemsAcquired.length === currentGame.levelConfig.itemsToAcquire && this.isLastPage) {
           textBox.setVisible(false)
-          this.scene.events.emit('startTransition')
         } else if (this.isLastPage) {
           textBox.setVisible(false)
         } else {
@@ -113,14 +112,14 @@ export default class UIScene extends Phaser.Scene {
     }, this)
 
     //launching text box on level complete
-    currentGame.events.on('levelComplete', function(level, item) {
-      this.inventoryBar.children.entries.forEach(el => {
-        if (item === el.frame.name) {
-          el.clearTint()
-          textBox.setVisible(true).start(levelCompleteDialog(currentGame, item, level, foodNames, levelNums), 50)
-        }
-      })
-    }, this)
+    // currentGame.events.on('levelComplete', function(level, item) {
+    //   this.inventoryBar.children.entries.forEach(el => {
+    //     if (item === el.frame.name) {
+    //       el.clearTint()
+    //       textBox.setVisible(true).start(levelCompleteDialog(currentGame, item, level, foodNames, levelNums), 50)
+    //     }
+    //   })
+    // }, this)
   }
   
 }
