@@ -122,10 +122,6 @@ export default class WorldScene extends Phaser.Scene {
     // Otherwise, it will keep searching for a good spot
     this.randomizePlayerSpawn(4, 3)
   
-
-    //create container for puzzle
-    const container = this.add.container(0, 0)
-
     //Making Puzzle Sprites:
     //Creating sokoban puzzle sprites' physics group:
     this.sokoBoxes = this.physics.add.group({
@@ -137,7 +133,8 @@ export default class WorldScene extends Phaser.Scene {
     })
 
     this.sokoWalls = this.physics.add.group({
-      classType: SokoWall
+      classType: SokoWall,
+      immovable: true
     })
 
     //Creating sokoBoxes, sokoGoals, and sokoWalls for puzzle
@@ -159,20 +156,13 @@ export default class WorldScene extends Phaser.Scene {
       this.startDialogue, 
       null, 
       this)
-    // this.physics.add.collider(this.player, wallsForPuzzle)
-    this.physics.add.collider(this.player, this.sokoBoxes, this.moveBox, null, this) //Player can push the puzzle boxes
-    this.physics.add.collider(this.player, this.sokoWalls) //Player can't move through puzzle walls
-    
-    //BOXES ARE STILL GOING THROUGH THE WALLS :(
-    this.physics.add.collider(this.sokoBoxes, this.sokoWalls, this.boxesCantGoThruWalls, null, this)
-  
-    // this.sokoBoxes.children.entries.map((sokobox) => {
-    //   console.log('before:', sokobox)
-    //   this.physics.add.overlap(sokobox, this.sokoWalls, this.boxesCantGoThruWalls, null, this)
-    //   console.log('after:', sokobox);
-    // })
-    // this.physics.add.collider(this.sokoBoxes, this.sokoWalls) //Blocks off sokoban puzzle boxes from moving through/ past puzzle walss
 
+
+    this.physics.add.collider(this.player, this.sokoBoxes) //Player can push the puzzle boxes
+    this.physics.add.collider(this.player, this.sokoWalls) //Player can't move through puzzle walls
+    this.physics.add.collider(this.sokoBoxes, [this.sokoWalls, this.sokoBoxes])
+    this.physics.add.collider(this.sokoBoxes, this.sokoBoxes)
+  
     this.physics.add.overlap(
       this.player,
       this.inventoryItems,
@@ -242,8 +232,12 @@ export default class WorldScene extends Phaser.Scene {
         if (boxPuzzleLayer['data'][i][j] === 28) {
           let x = j * 16 + 8; //16 = tile size and 8 = offset
           let y = i * 16 + 8; //16 = tile size and 8 = offset
-          let sokoBoxSprite = new SokoBox(this, x, y, 'sokoboxes');
-          sokoBoxSprite.setAcceleration(0,0); //only moves as much as it is pushed by the player
+          let sokoBoxSprite = this.physics.add.image(x, y, 'sokoboxes');
+          sokoBoxSprite.enableBody = true
+          sokoBoxSprite.setFriction(10000, 10000)
+          sokoBoxSprite.body.setCollideWorldBounds(true)
+          // sokoBoxSprite.body.setAcceleration(0,0); //only moves as much as it is pushed by the player
+          // sokoBoxSprite.body.setDrag(10000, 10000)
           sokoBoxSprite.setScale(0.25);
           group.add(sokoBoxSprite);
         }
@@ -257,9 +251,7 @@ export default class WorldScene extends Phaser.Scene {
         if (goalPuzzleLayer['data'][i][j] === 9) {
           let x = j * 16 + 8;
           let y = i * 16 + 8;
-          let sokoGoalSprite = new SokoGoal(this, x, y, 'sokogoals');
-          sokoGoalSprite.body.immovable = true; //goal positions are not movable by the player
-          sokoGoalSprite.body.moves = false;
+          let sokoGoalSprite = this.physics.add.image(x, y, 'sokogoals')
           sokoGoalSprite.setScale(0.25);
           group.add(sokoGoalSprite);
         }
@@ -273,9 +265,7 @@ export default class WorldScene extends Phaser.Scene {
         if (wallPuzzleLayer['data'][i][j] === 12) {
           let x = j * 16 + 8;
           let y = i * 16 + 8;
-          let sokoWallSprite = new SokoWall(this, x, y, 'sokowalls');
-          sokoWallSprite.body.immovable = true;
-          sokoWallSprite.body.moves = false;
+          let sokoWallSprite = this.physics.add.image(x, y, 'sokowalls');
           sokoWallSprite.setScale(0.25);
           group.add(sokoWallSprite);
         }
@@ -310,20 +300,20 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   //Callback for moving box
-  moveBox(player, sokoBoxSprite) {
-    player.setVelocityX(0)
-    player.setVelocityY(0)
-    sokoBoxSprite.setVelocityX(0)
-    sokoBoxSprite.setVelocityY(0)
-  }
+  // moveBox(player, sokoBoxSprite) {
+  //   // player.setVelocityX(0)
+  //   // player.setVelocityY(0)
+  //   sokoBoxSprite.setVelocity(0)
+  //   sokoBoxSprite.setVelocityY(0)
+  // }
 
-  //Callback for boxes not going through walls
-  boxesCantGoThruWalls(player, sokoBoxSprite) {
-    player.setVelocityX(0)
-    player.setVelocityY(0)
-    sokoBoxSprite.setVelocityX(0)
-    sokoBoxSprite.setVelocityY(0)
-  }
+  // //Callback for boxes not going through walls
+  // boxesCantGoThruWalls(player, sokoBoxSprite) {
+  //   player.setVelocityX(0)
+  //   player.setVelocityY(0)
+  //   sokoBoxSprite.setVelocityX(0)
+  //   sokoBoxSprite.setVelocityY(0)
+  // }
 
   //Creating animation sequence for player movement
   createAnimations() {
@@ -370,10 +360,6 @@ export default class WorldScene extends Phaser.Scene {
     })
   }
 
-  update(time, delta) {
-    this.player.update(this.cursors)
-  }
-
   randomizePlayerSpawn(x, y) {
     // Checks the 9 square area if it's clear to spawn in.
     let collisionCheck = [
@@ -397,6 +383,13 @@ export default class WorldScene extends Phaser.Scene {
       this.randomizePlayerSpawn(x + 1, y + 1)
     }
   }
+
+  update(time, delta) {
+    this.player.update(this.cursors)
+
+
+  }
+
 }
 
 function randomizeWorld() {
