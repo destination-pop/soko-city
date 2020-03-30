@@ -58,6 +58,9 @@ export default class UIScene extends Phaser.Scene {
         textBox.resetChildVisibleState(icon);
         if (this.isTyping) {
             this.stop(true);
+        } else if (currentGame.levelConfig.itemsAcquired.length === currentGame.levelConfig.itemsToAcquire && this.isLastPage) {
+          textBox.setVisible(false)
+          this.scene.events.emit('startTransition')
         } else if (this.isLastPage) {
           textBox.setVisible(false)
         } else {
@@ -79,6 +82,7 @@ export default class UIScene extends Phaser.Scene {
 
     //launching text box for initial quest and populating inventory bar
     currentGame.events.on('newLevel', function () {
+      this.inventoryBar.setVisible(true)
       populateInventoryBar(this, currentGame.inventoryItems.children.entries, foodNames)
       textBox.setVisible(true).start(levelIntro(), 50)
     }, this)

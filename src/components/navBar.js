@@ -1,20 +1,20 @@
-import React, { Component } from 'react'
+import React from 'react'
 
-class NavBar extends Component {
-  constructor() {
-    super()
-    this.state = {
-      loggedIn: false
-    }
-  }
-  render() {
-    return (
-      <div>
-        <nav>I am a (currently) useless navbar. Please disregard.</nav>
-        <hr />
-      </div>
-    )
-  }
+const NavBar = props => {
+  const { isLoggedIn, logout } = props
+
+  return (
+    <div>
+      <nav>
+        {isLoggedIn ? (
+          <button type="button" onClick={logout}>
+            Sign Out
+          </button>
+        ) : null}
+      </nav>
+      <hr />
+    </div>
+  )
 }
 
 export default NavBar
