@@ -1,8 +1,9 @@
 import 'phaser'
 import Player from '../entity/Player'
 import InventoryItem from '../entity/InventoryItem'
+import { populateInventoryBar, setLevelConfig } from '../entity/utilityFunctions'
 import NPC from '../entity/NPC'
-import { loadNextLevel } from '../entity/utilityFunctions'
+// import { loadNextLevel } from '../entity/utilityFunctions'
 import {puzzleConfig, boxPuzzleLayer, wallPuzzleLayer, goalPuzzleLayer} from '../puzzles/converter'
 import SokoBox from '../entity/SokoBox'
 import SokoGoal from '../entity/SokoGoal'
@@ -23,9 +24,16 @@ export default class WorldScene extends Phaser.Scene {
       itemsToAcquire: 3,
       itemsAcquired: [],
       NPC: 1,
-      mapHeight: 150,
-      mapWidth: 150,
+      mapHeight: 40,
+      mapWidth: 40,
+      puzzleOptions: {
+        width: 5,
+        height: 5,
+        boxes: 1,
+        minWalls: 3
+      }
     }
+    this.transitionToNextLevel = this.transitionToNextLevel.bind(this)
   }
 
   preload() {
@@ -74,6 +82,8 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   create() {
+    //fade into the scene
+    this.cameras.main.fadeIn(500)
 
     // Setting up dynamic map and object layers
     map = this.make.tilemap({
@@ -99,7 +109,7 @@ export default class WorldScene extends Phaser.Scene {
     groundLayer.putTileAt(42, 0, map.height - 1)
 
     randomizeWorld() // Initial map randomization
-    
+
     //creating random items for scene and updating UI with items in scene
 
     this.inventoryItems = this.physics.add.group({
@@ -120,8 +130,8 @@ export default class WorldScene extends Phaser.Scene {
 
     // If 3x3 area around (4, 3) is empty, we'll spawn our player here
     // Otherwise, it will keep searching for a good spot
-    this.randomizePlayerSpawn(4, 3)
-  
+    this.randomizePlayerSpawn(15, 15)
+
 
     //create container for puzzle
     const container = this.add.container(0, 0)
@@ -144,7 +154,7 @@ export default class WorldScene extends Phaser.Scene {
     this.createSokoBoxSprite(this.sokoBoxes)
     this.createSokoGoalSprite(this.sokoGoals)
     this.createSokoWallSprite(this.sokoWalls)
- 
+
 
     // Setting our world bounds
     this.physics.world.bounds.width = map.widthInPixels
@@ -154,18 +164,18 @@ export default class WorldScene extends Phaser.Scene {
     this.physics.add.collider(this.player, objectLayer) //Blocks off trees
     this.physics.add.collider(this.player, groundLayer) //Blocks off the edges
     this.physics.add.collider(
-      this.player, 
-      this.villagers, 
-      this.startDialogue, 
-      null, 
+      this.player,
+      this.villagers,
+      this.startDialogue,
+      null,
       this)
     // this.physics.add.collider(this.player, wallsForPuzzle)
     this.physics.add.collider(this.player, this.sokoBoxes, this.moveBox, null, this) //Player can push the puzzle boxes
     this.physics.add.collider(this.player, this.sokoWalls) //Player can't move through puzzle walls
-    
+
     //BOXES ARE STILL GOING THROUGH THE WALLS :(
     this.physics.add.collider(this.sokoBoxes, this.sokoWalls, this.boxesCantGoThruWalls, null, this)
-  
+
     // this.sokoBoxes.children.entries.map((sokobox) => {
     //   console.log('before:', sokobox)
     //   this.physics.add.overlap(sokobox, this.sokoWalls, this.boxesCantGoThruWalls, null, this)
@@ -199,10 +209,10 @@ export default class WorldScene extends Phaser.Scene {
     // Animating sprite motion
     this.createAnimations()
 
-    
+
   }
 
-  randomizeItems(group, quantity) {  
+  randomizeItems(group, quantity) {
     let unique = []
     while (unique.length < quantity) {
       let x = Phaser.Math.RND.between(200, 300);
@@ -217,7 +227,7 @@ export default class WorldScene extends Phaser.Scene {
     }
     this.events.emit('newLevel')
   }
-  
+
 
   randomizeNPCs(group, quantity) {
     let unique = [];
@@ -283,21 +293,36 @@ export default class WorldScene extends Phaser.Scene {
     }
   }
 
+  //loads the transition scene leading to the next level scene
+  transitionToNextLevel(level) {
+    console.log(`Level ${level} Complete `)
+    this.cameras.main.fadeOut(500)
+    this.time.addEvent({
+      delay: 500,
+      callback: () => {
+        this.levelConfig = setLevelConfig(this.levelConfig.level+1)
+        this.scene.start('TransitionScene');
+        // In progress, we can add other level-up activities here
+      }
+    })
+  }
+
   // Callback for player/inventory item overlap
   pickUpItem(player, item) {
     item.disableBody(true, true)
     item.setVisible(false)
+
     this.levelConfig.itemsAcquired.push(item)
 
     if (this.levelConfig.itemsAcquired.length === this.levelConfig.itemsToAcquire) {
       this.events.emit('levelComplete', this.levelConfig.level, item.frame.name)
       console.log('Level Completed: ', this.levelConfig.level)
-      loadNextLevel(this)
+      this.transitionToNextLevel(this.levelConfig.level)
     } else {
       this.events.emit('itemFound', item.frame.name)
     }
 
-    //launch itemAcquiredDialog on puzzle solve
+    // launch itemAcquiredDialog on puzzle solve
     // else {
     //   this.events.emit('itemFromVillager', item.frame.name)
     // }

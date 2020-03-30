@@ -22,12 +22,13 @@ function converter(twoDimArray) {
 }
 
 //Add wall to the perimeter of the puzzle
-//Note: we will have to leave an opening for the player to enter
 function addPerimeter(convertedPuzzle) {
    let newRow = Array(convertedPuzzle.length-2).fill(wallIdx)
 
    convertedPuzzle.push(newRow)
-   convertedPuzzle.unshift(newRow)
+   convertedPuzzle.unshift(newRow.slice())
+   //Leave an opening for the player to enter puzzle
+   convertedPuzzle[convertedPuzzle.length-1][convertedPuzzle.length-2] = blankIdx
 
    convertedPuzzle.forEach(row=>{
       row.push(wallIdx)
@@ -50,7 +51,7 @@ let puzzleConfig = {
 function extractLayer(data, value) {
    let layer = [];
    for (let i = 0; i < data.length; i++) {
-      let newRow = []; 
+      let newRow = [];
       for (let j= 0; j < data[i].length; j++) {
          if (data[i][j] === value) {
             newRow.push(value)
