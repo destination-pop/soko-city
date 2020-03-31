@@ -194,7 +194,7 @@ const foodNames = {
   35: 'kiwi',
   36: 'pumpkin pie',
   37: 'lemon meringue pie',
-  38: 'apple pie',
+  38: 'hot apple pie',
   39: 'pickle',
   40: 'pretzel',
   41: 'salami',
@@ -212,13 +212,13 @@ const foodNames = {
   53: 'can of sardines',
   54: 'dragonfruit',
   55: 'sausage',
-  56: 'avocado',
+  56: 'millenial avocado',
   57: 'tuna steak',
   58: 'prawn',
   59: 'giant olive',
   60: 'jar of pickled eggs',
   61: 'mystery meat',
-  62: 'onion',
+  62: 'sweet onion',
   63: 'shrimp'
 }
 
