@@ -213,7 +213,7 @@ export default class WorldScene extends Phaser.Scene {
 
     const uiScene = this.scene.get('UIScene')
 
-    uiScene.events.on('startTransition', function () {
+    uiScene.events.once('startTransition', function () {
       uiScene.inventoryBar.setVisible(false)
       this.transitionToNextLevel(this.levelConfig.level)
     }, this)
