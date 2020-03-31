@@ -307,6 +307,7 @@ export default class WorldScene extends Phaser.Scene {
       delay: 500,
       callback: () => {
         this.levelConfig = setLevelConfig(this.levelConfig.level+1)
+        this.events.off('update')
         this.scene.start('TransitionScene');
         // In progress, we can add other level-up activities here
       }
