@@ -301,7 +301,6 @@ export default class WorldScene extends Phaser.Scene {
 
   //loads the transition scene leading to the next level scene
   transitionToNextLevel(level) {
-    console.log(`Level ${level} Complete `)
     this.cameras.main.fadeOut(500)
     this.time.addEvent({
       delay: 500,
@@ -323,7 +322,6 @@ export default class WorldScene extends Phaser.Scene {
 
     if (this.levelConfig.itemsAcquired.length === this.levelConfig.itemsToAcquire) {
       this.events.emit('levelComplete', this.levelConfig.level, item.frame.name)
-      console.log('Level Completed: ', this.levelConfig.level)
     } else {
       this.events.emit('itemFound', item.frame.name)
     }
@@ -341,7 +339,6 @@ export default class WorldScene extends Phaser.Scene {
     if (allGoals.every(function (goal) {
       return goal.isTinted
     })) {
-      console.log('YOU SOLVED IT')
       this.events.emit('puzzleSolved')
     }
   }
