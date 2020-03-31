@@ -1,10 +1,9 @@
 import 'phaser'
 import Player from '../entity/Player'
 import InventoryItem from '../entity/InventoryItem'
-import { populateInventoryBar, setLevelConfig } from '../entity/utilityFunctions'
+import { setLevelConfig } from '../entity/utilityFunctions'
 import NPC from '../entity/NPC'
-// import { loadNextLevel } from '../entity/utilityFunctions'
-import {puzzleConfig, boxPuzzleLayer, wallPuzzleLayer, goalPuzzleLayer} from '../puzzles/converter'
+import { boxPuzzleLayer, wallPuzzleLayer, goalPuzzleLayer } from '../puzzles/converter'
 import SokoBox from '../entity/SokoBox'
 import SokoGoal from '../entity/SokoGoal'
 import SokoWall from '../entity/SokoWall'
@@ -24,16 +23,23 @@ export default class WorldScene extends Phaser.Scene {
       itemsToAcquire: 3,
       itemsAcquired: [],
       NPC: 1,
-      mapHeight: 40,
+      mapHeight: 40, //Unit: 16px squares
       mapWidth: 40,
       puzzleOptions: {
-        width: 5,
-        height: 5,
+        x: 40, //Unit: pixels
+        y: 40,
+        width: 7, //Unit: 16px squares, includes perimeter
+        height: 7,
         boxes: 1,
         minWalls: 3
       }
     }
+
     this.transitionToNextLevel = this.transitionToNextLevel.bind(this)
+    this.createSokoBoxSprite = this.createSokoBoxSprite.bind(this)
+    this.createSokoGoalSprite = this.createSokoGoalSprite.bind(this)
+    this.createSokoWallSprite = this.createSokoWallSprite.bind(this)
+    this.randomizeWorld = this.randomizeWorld.bind(this)
   }
 
   preload() {
@@ -75,10 +81,6 @@ export default class WorldScene extends Phaser.Scene {
       frameWidth: 16,
       frameHeight: 16
     })
-
-    //Load player level
-    //NOTE: this will not be static eventually
-    //this.levelConfig = setLevelConfig(2)
   }
 
   create() {
@@ -108,7 +110,7 @@ export default class WorldScene extends Phaser.Scene {
     groundLayer.putTileAt(44, map.width - 1, map.height - 1)
     groundLayer.putTileAt(42, 0, map.height - 1)
 
-    randomizeWorld() // Initial map randomization
+    this.randomizeWorld() // Initial map randomization
 
     //creating random items for scene and updating UI with items in scene
 
@@ -131,7 +133,7 @@ export default class WorldScene extends Phaser.Scene {
     // If 3x3 area around (4, 3) is empty, we'll spawn our player here
     // Otherwise, it will keep searching for a good spot
     this.randomizePlayerSpawn(15, 15)
-  
+
     //Making Puzzle Sprites:
     //Creating sokoban puzzle sprites' physics group:
     this.sokoBoxes = this.physics.add.group({
@@ -172,7 +174,7 @@ export default class WorldScene extends Phaser.Scene {
     this.physics.add.collider(this.player, this.sokoWalls) //Player can't move through puzzle walls
     this.physics.add.collider(this.sokoBoxes, [this.sokoWalls, this.sokoBoxes])
     this.physics.add.collider(this.sokoBoxes, this.sokoBoxes)
-  
+
     this.physics.add.overlap(
       this.player,
       this.inventoryItems,
@@ -244,11 +246,11 @@ export default class WorldScene extends Phaser.Scene {
 
 //Utility fxns for creating puzzle sprites
   createSokoBoxSprite(group) {
-    for (let i=0; i < 11; i++) {
-      for (let j=0; j < 11; j++) {
+    for (let i=0; i < this.levelConfig.puzzleOptions.height; i++) {
+      for (let j=0; j < this.levelConfig.puzzleOptions.width; j++) {
         if (boxPuzzleLayer['data'][i][j] === 28) {
-          let x = j * 16 + 8; //16 = tile size and 8 = offset
-          let y = i * 16 + 8; //16 = tile size and 8 = offset
+          let x = j * 16 + this.levelConfig.puzzleOptions.x; //16 = tile size
+          let y = i * 16 + this.levelConfig.puzzleOptions.y; //16 = tile size
           let sokoBoxSprite = this.physics.add.image(x, y, 'sokoboxes');
           sokoBoxSprite.enableBody = true
           sokoBoxSprite.setFriction(10000, 10000)
@@ -263,11 +265,11 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   createSokoGoalSprite(group) {
-    for (let i=0; i < 11; i++) {
-      for (let j=0; j < 11; j++) {
+    for (let i=0; i < this.levelConfig.puzzleOptions.height; i++) {
+      for (let j=0; j < this.levelConfig.puzzleOptions.width; j++) {
         if (goalPuzzleLayer['data'][i][j] === 9) {
-          let x = j * 16 + 8;
-          let y = i * 16 + 8;
+          let x = j * 16 + this.levelConfig.puzzleOptions.x;
+          let y = i * 16 + this.levelConfig.puzzleOptions.y;
           let sokoGoalSprite = this.physics.add.image(x, y, 'sokogoals')
           sokoGoalSprite.setScale(0.25);
           group.add(sokoGoalSprite);
@@ -277,11 +279,11 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   createSokoWallSprite(group) {
-    for (let i=0; i < 11; i++) {
-      for (let j=0; j < 11; j++) {
+    for (let i=0; i < this.levelConfig.puzzleOptions.height; i++) {
+      for (let j=0; j < this.levelConfig.puzzleOptions.width; j++) {
         if (wallPuzzleLayer['data'][i][j] === 12) {
-          let x = j * 16 + 8;
-          let y = i * 16 + 8;
+          let x = j * 16 + this.levelConfig.puzzleOptions.x;
+          let y = i * 16 + this.levelConfig.puzzleOptions.y;
           let sokoWallSprite = this.physics.add.image(x, y, 'sokowalls');
           sokoWallSprite.setScale(0.25);
           group.add(sokoWallSprite);
@@ -292,7 +294,6 @@ export default class WorldScene extends Phaser.Scene {
 
   //loads the transition scene leading to the next level scene
   transitionToNextLevel(level) {
-    console.log(`Level ${level} Complete `)
     this.cameras.main.fadeOut(500)
     this.time.addEvent({
       delay: 500,
@@ -417,31 +418,33 @@ export default class WorldScene extends Phaser.Scene {
 
   update(time, delta) {
     this.player.update(this.cursors)
+  }
 
+  randomizeWorld() {
+    // Fill the floor with random ground tiles
+    groundLayer.weightedRandomize(1, 1, map.width - 2, map.height - 2, [
+      { index: 22, weight: 10 }, // Regular grass
+      { index: 45, weight: 1 }, // One leaf
+      { index: 46, weight: 1 } // Two leaves
+    ])
 
+    // Fill the floor with random, weighted tiles
+    objectLayer.weightedRandomize(1, 1, map.width - 2, map.height - 2, [
+      { index: -1, weight: 50 }, // Empty tile
+      { index: 91, weight: 3 }, // Big Tree
+      { index: 112, weight: 2 } // Small Tree
+    ])
 
+    const x = (this.levelConfig.puzzleOptions.x - 24) /16
+    const y = (this.levelConfig.puzzleOptions.y - 24) /16
+    const width = (this.levelConfig.puzzleOptions.width + 2)
+    const height = (this.levelConfig.puzzleOptions.height + 2)
+
+    console.log(x,' | ',y,' | ',width,' | ',height)
+
+    // Clear out a rectangle of empty space for sokoban puzzle (top left)
+    objectLayer.fill(-1, x, y, width, height); //clear out any objects for collisions
+    groundLayer.fill(22, x, y, width, height); //yellow tile for puzzlefor plain green: use 22 instead of 85
   }
 
 }
-
-function randomizeWorld() {
-  // Fill the floor with random ground tiles
-  groundLayer.weightedRandomize(1, 1, map.width - 2, map.height - 2, [
-    { index: 22, weight: 10 }, // Regular grass
-    { index: 45, weight: 1 }, // One leaf
-    { index: 46, weight: 1 } // Two leaves
-  ])
-
-  // Fill the floor with random, weighted tiles
-  objectLayer.weightedRandomize(1, 1, map.width - 2, map.height - 2, [
-    { index: -1, weight: 50 }, // Empty tile
-    { index: 91, weight: 3 }, // Big Tree
-    { index: 112, weight: 2 } // Small Tree
-  ])
-
-  // // Clear out a rectangle of empty space for sokoban puzzle (top left)
-  objectLayer.fill(-1, 0, 0, 12, 12); //clear out any objects for collisions
-  groundLayer.fill(22, 0, 0, 11, 11); //yellow tile for puzzlefor plain green: use 22 instead of 85
-
-}
-

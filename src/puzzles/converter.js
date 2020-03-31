@@ -50,7 +50,7 @@ function convertToSingleMapLayer(twoDimArray, charSet, tileIdx) {
    if (tileIdx === wallIdx) {
       singleMapLayer[singleMapLayer.length-1][singleMapLayer[0].length-2] = blankIdx
    }
-   console.log(singleMapLayer, 'Tile Idx: wall=12,box=28,goal=9: ', tileIdx)
+
    return singleMapLayer
 }
 
