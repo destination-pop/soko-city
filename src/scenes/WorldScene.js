@@ -127,10 +127,15 @@ export default class WorldScene extends Phaser.Scene {
 
 
     this.randomizeNPCs(this.villagers, this.levelConfig.NPC)
+    // this.hideNPCItems(this.inventoryItems, this.villagers)
 
     // If 3x3 area around (4, 3) is empty, we'll spawn our player here
     // Otherwise, it will keep searching for a good spot
     this.randomizePlayerSpawn(15, 15)
+
+    // Setting keyboard input for movement
+    this.cursors = this.input.keyboard.createCursorKeys()
+
   
     //Making Puzzle Sprites:
     //Creating sokoban puzzle sprites' physics group:
@@ -138,9 +143,7 @@ export default class WorldScene extends Phaser.Scene {
       classType: SokoBox
     })
 
-    this.sokoGoals = this.physics.add.group({
-      classType: SokoGoal
-    })
+    this.sokoGoals = this.physics.add.group()
 
     this.sokoWalls = this.physics.add.group({
       classType: SokoWall,
@@ -153,10 +156,6 @@ export default class WorldScene extends Phaser.Scene {
     this.createSokoWallSprite(this.sokoWalls)
 
 
-    // Setting our world bounds
-    this.physics.world.bounds.width = map.widthInPixels
-    this.physics.world.bounds.height = map.heightInPixels
-
     // Setting collision rules for player
     this.physics.add.collider(this.player, objectLayer) //Blocks off trees
     this.physics.add.collider(this.player, groundLayer) //Blocks off the edges
@@ -168,21 +167,29 @@ export default class WorldScene extends Phaser.Scene {
       this)
 
 
-    this.physics.add.collider(this.player, this.sokoBoxes, function (player, sprite) {
-      sprite.update(this.cursors)
-    }) //Player can push the puzzle boxes
+      //setting all puzzle collisions
+    this.physics.add.collider(this.player, this.sokoBoxes, this.updateBoxMovement) //Player can push the puzzle boxes
+
     this.physics.add.collider(this.player, this.sokoWalls) //Player can't move through puzzle walls
+
     this.physics.add.collider(this.sokoBoxes, this.sokoWalls)
-    this.physics.add.collider(this.sokoBoxes, this.sokoBoxes, function (sprite1, sprite2) {
-      sprite1.update(this.cursors)
-      sprite2.update(this.cursors)
-    })
+    this.physics.add.collider(this.sokoBoxes, this.sokoBoxes)
   
+    //adding overlap for picking up items
     this.physics.add.overlap(
       this.player,
       this.inventoryItems,
       this.pickUpItem,
       null,
+      this
+    )
+
+    // adding overlap for puzzle boxes on goals
+    this.physics.add.overlap(
+      this.sokoBoxes,
+      this.sokoGoals,
+      this.puzzleSolve,
+      null, 
       this
     )
 
@@ -198,9 +205,6 @@ export default class WorldScene extends Phaser.Scene {
     this.cameras.main.roundPixels = true
     this.cameras.main.setZoom(2)
 
-    // Setting keyboard input for movement
-    this.cursors = this.input.keyboard.createCursorKeys()
-
     // Animating sprite motion
     this.createAnimations()
 
@@ -213,6 +217,9 @@ export default class WorldScene extends Phaser.Scene {
     }, this)
 
   }
+  //end of create method
+
+
 
   randomizeItems(group, quantity) {
     let unique = []
@@ -269,7 +276,7 @@ export default class WorldScene extends Phaser.Scene {
         if (goalPuzzleLayer['data'][i][j] === 9) {
           let x = j * 16 + 8;
           let y = i * 16 + 8;
-          let sokoGoalSprite = this.physics.add.image(x, y, 'sokogoals')
+          let sokoGoalSprite = new SokoGoal(this, x, y, 'sokogoals')
           sokoGoalSprite.setScale(0.25);
           group.add(sokoGoalSprite);
         }
@@ -283,7 +290,7 @@ export default class WorldScene extends Phaser.Scene {
         if (wallPuzzleLayer['data'][i][j] === 12) {
           let x = j * 16 + 8;
           let y = i * 16 + 8;
-          let sokoWallSprite = this.physics.add.image(x, y, 'sokowalls');
+          let sokoWallSprite = new SokoWall(this, x, y, 'sokowalls');
           sokoWallSprite.setSize(50, 50)
           sokoWallSprite.setScale(0.25)
           group.add(sokoWallSprite);
@@ -319,11 +326,23 @@ export default class WorldScene extends Phaser.Scene {
     } else {
       this.events.emit('itemFound', item.frame.name)
     }
+  }
 
-    // launch itemAcquiredDialog on puzzle solve
-    // else {
-    //   this.events.emit('itemFromVillager', item.frame.name)
-    // }
+  updateBoxMovement (player, box) {
+    box.update()
+  }
+
+  puzzleSolve (box, goal) {
+    goal.setTint(0xFF00FF)
+    goal.disableBody(true, false)
+
+    let allGoals = this.sokoGoals.getChildren()
+    if (allGoals.every(function (goal) {
+      return goal.isTinted
+    })) {
+      console.log('YOU SOLVED IT')
+      this.events.emit('puzzleSolved')
+    }
   }
 
   //callback for player/NPC overlap
