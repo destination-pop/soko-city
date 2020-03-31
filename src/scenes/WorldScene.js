@@ -108,6 +108,8 @@ export default class WorldScene extends Phaser.Scene {
     groundLayer.putTileAt(44, map.width - 1, map.height - 1)
     groundLayer.putTileAt(42, 0, map.height - 1)
 
+
+
     randomizeWorld() // Initial map randomization
 
     //creating random items for scene and updating UI with items in scene
@@ -215,6 +217,7 @@ export default class WorldScene extends Phaser.Scene {
       uiScene.inventoryBar.setVisible(false)
       this.transitionToNextLevel(this.levelConfig.level)
     }, this)
+
 
   }
   //end of create method

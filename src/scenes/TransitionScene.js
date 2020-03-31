@@ -16,8 +16,8 @@ class TransitionScene extends Phaser.Scene {
 	}
 
   handleClick() {
-    this.scene.start('WorldScene');
     this.scene.bringToTop('UIScene')
+    this.scene.start('WorldScene');
   }
 }
 

@@ -26,6 +26,7 @@ export default class UIScene extends Phaser.Scene {
     //pulling information from World Scene
     const currentGame = this.scene.get('WorldScene')
 
+
     // initializing text box for quests
     const textBox = this.rexUI.add.textBox({
       x: 100,
@@ -79,7 +80,7 @@ export default class UIScene extends Phaser.Scene {
     this.inventoryBar = this.add.group()
 
     //launching text box for initial quest and populating inventory bar
-    currentGame.events.on('newLevel', function () {
+    currentGame.events.once('newLevel', function () {
       this.inventoryBar.setVisible(true)
       populateInventoryBar(this, currentGame.inventoryItems.children.entries, foodNames)
       textBox.setVisible(true).start(levelIntro(), 50)
