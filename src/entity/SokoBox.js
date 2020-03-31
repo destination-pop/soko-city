@@ -6,6 +6,7 @@ export default class SokoBox extends Phaser.Physics.Arcade.Sprite {
     this.scene = scene;
     this.scene.add.existing(this);
     this.scene.physics.world.enable(this);
+    this.scene.events.on('update', this.update, this)
   } 
 
   update() {
