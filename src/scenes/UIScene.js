@@ -159,7 +159,7 @@ const foodNames = {
   0: 'cookie',
   1: 'chocolate bar',
   2: 'stein of beer',
-  3: 'moonshine',
+  3: 'jug of moonshine',
   4: 'fancy spirit',
   5: 'pineapple tart',
   6: 'sushi roll',

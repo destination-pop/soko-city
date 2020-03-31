@@ -29,7 +29,7 @@ class TitleScene extends Phaser.Scene {
         delay: 500,
         callback: () => {
           this.scene.bringToTop('UIScene')
-          this.scene.launch('UIScene');
+          setTimeout(this.scene.launch('UIScene'), 3000);
           this.scene.start('WorldScene');
         }
       })
