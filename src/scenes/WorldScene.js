@@ -7,35 +7,16 @@ import SokoBox from '../entity/SokoBox'
 import SokoGoal from '../entity/SokoGoal'
 import SokoWall from '../entity/SokoWall'
 
+import firebase from 'firebase'
+import { saveLevelProgression } from '../server/db'
+
 let groundLayer
 let objectLayer
 let map
 
-
 export default class WorldScene extends Phaser.Scene {
   constructor() {
     super('WorldScene')
-    this.levelConfig = {
-      level: 0,
-      itemsToAcquire: 3,
-      itemsAcquired: [],
-      NPC: 1,
-      mapHeight: 40, //Unit: 16px squares
-      mapWidth: 40,
-      puzzleOptions: {
-        x: 32, //Unit: pixels
-        y: 32,
-        width: 7, //Unit: 16px squares, includes perimeter
-        height: 7,
-        boxes: 1,
-        minWalls: 3
-      },
-      puzzleLayers: {
-        box: {},
-        goal: {},
-        wall: {}
-      }
-    }
 
     this.transitionToNextLevel = this.transitionToNextLevel.bind(this)
     this.createSokoBoxSprite = this.createSokoBoxSprite.bind(this)
@@ -84,11 +65,11 @@ export default class WorldScene extends Phaser.Scene {
       frameWidth: 16,
       frameHeight: 16
     })
-
-    this.levelConfig = setLevelConfig(this.levelConfig.level+1)
   }
 
-  create() {
+  create(data) {
+    this.levelConfig = data
+
     //fade into the scene
     this.cameras.main.fadeIn(500)
 
@@ -130,8 +111,7 @@ export default class WorldScene extends Phaser.Scene {
       classType: NPC,
       immovable: true
     })
-    this.villagers.enableBody = true;
-
+    this.villagers.enableBody = true
 
     this.randomizeNPCs(this.villagers, this.levelConfig.NPC)
 
@@ -159,7 +139,6 @@ export default class WorldScene extends Phaser.Scene {
     this.createSokoGoalSprite(this.sokoGoals)
     this.createSokoWallSprite(this.sokoWalls)
 
-
     // Setting our world bounds
     this.physics.world.bounds.width = map.widthInPixels
     this.physics.world.bounds.height = map.heightInPixels
@@ -172,8 +151,8 @@ export default class WorldScene extends Phaser.Scene {
       this.villagers,
       this.startDialogue,
       null,
-      this)
-
+      this
+    )
 
     this.physics.add.collider(this.player, this.sokoBoxes) //Player can push the puzzle boxes
     this.physics.add.collider(this.player, this.sokoWalls) //Player can't move through puzzle walls
@@ -206,14 +185,22 @@ export default class WorldScene extends Phaser.Scene {
     // Animating sprite motion
     this.createAnimations()
 
-
     const uiScene = this.scene.get('UIScene')
 
-    uiScene.events.on('startTransition', function () {
-      uiScene.inventoryBar.setVisible(false)
-      this.transitionToNextLevel(this.levelConfig.level)
-    }, this)
-
+    uiScene.events.once(
+      'startTransition',
+      function() {
+        uiScene.inventoryBar.setVisible(false)
+        this.transitionToNextLevel(this.levelConfig.level)
+        firebase.auth().currentUser.email
+          ? saveLevelProgression(
+              firebase.auth().currentUser.email,
+              this.levelConfig.level
+            )
+          : null
+      },
+      this
+    )
   }
   //end of create method
 
@@ -222,9 +209,9 @@ export default class WorldScene extends Phaser.Scene {
   randomizeItems(group, quantity) {
     let unique = []
     while (unique.length < quantity) {
-      let x = Phaser.Math.RND.between(200, 300);
-      let y = Phaser.Math.RND.between(200, 300);
-      let frame = Phaser.Math.RND.between(0, 63);
+      let x = Phaser.Math.RND.between(200, 300)
+      let y = Phaser.Math.RND.between(200, 300)
+      let frame = Phaser.Math.RND.between(0, 63)
 
       if (unique.indexOf(frame) === -1) {
         unique.push(frame)
@@ -235,13 +222,12 @@ export default class WorldScene extends Phaser.Scene {
     this.events.emit('newLevel')
   }
 
-
   randomizeNPCs(group, quantity) {
-    let unique = [];
+    let unique = []
     while (unique.length < quantity) {
-      let x = Phaser.Math.RND.between(200, 300);
-      let y = Phaser.Math.RND.between(200, 300);
-      let frame = Phaser.Math.RND.between(0, 8);
+      let x = Phaser.Math.RND.between(200, 300)
+      let y = Phaser.Math.RND.between(200, 300)
+      let frame = Phaser.Math.RND.between(0, 8)
 
       if (unique.indexOf(frame) === -1) {
         unique.push(frame)
@@ -251,8 +237,7 @@ export default class WorldScene extends Phaser.Scene {
     }
   }
 
-
-//Utility fxns for creating puzzle sprites
+  //Utility fxns for creating puzzle sprites
   createSokoBoxSprite(group) {
     for (let i=0; i < this.levelConfig.puzzleOptions.height; i++) {
       for (let j=0; j < this.levelConfig.puzzleOptions.width; j++) {
@@ -263,8 +248,10 @@ export default class WorldScene extends Phaser.Scene {
           sokoBoxSprite.enableBody = true
           sokoBoxSprite.setFriction(10000, 10000)
           sokoBoxSprite.body.setCollideWorldBounds(true)
-          sokoBoxSprite.setScale(0.25);
-          group.add(sokoBoxSprite);
+          // sokoBoxSprite.body.setAcceleration(0,0); //only moves as much as it is pushed by the player
+          // sokoBoxSprite.body.setDrag(10000, 10000)
+          sokoBoxSprite.setScale(0.25)
+          group.add(sokoBoxSprite)
         }
       }
     }
@@ -277,8 +264,8 @@ export default class WorldScene extends Phaser.Scene {
           let x = j * 16 + this.levelConfig.puzzleOptions.x;
           let y = i * 16 + this.levelConfig.puzzleOptions.y;
           let sokoGoalSprite = this.physics.add.image(x, y, 'sokogoals')
-          sokoGoalSprite.setScale(0.25);
-          group.add(sokoGoalSprite);
+          sokoGoalSprite.setScale(0.25)
+          group.add(sokoGoalSprite)
         }
       }
     }
@@ -304,7 +291,9 @@ export default class WorldScene extends Phaser.Scene {
     this.time.addEvent({
       delay: 500,
       callback: () => {
-        this.scene.start('TransitionScene')
+        //Jas's note:  is this the correct place to increment level
+        this.levelConfig = setLevelConfig(this.levelConfig.level + 1)
+        this.scene.start('TransitionScene', this.levelConfig)
       }
     })
   }
@@ -316,7 +305,9 @@ export default class WorldScene extends Phaser.Scene {
 
     this.levelConfig.itemsAcquired.push(item)
 
-    if (this.levelConfig.itemsAcquired.length === this.levelConfig.itemsToAcquire) {
+    if (
+      this.levelConfig.itemsAcquired.length === this.levelConfig.itemsToAcquire
+    ) {
       this.events.emit('levelComplete', this.levelConfig.level, item.frame.name)
       console.log('Level Completed: ', this.levelConfig.level)
     } else {
@@ -332,7 +323,6 @@ export default class WorldScene extends Phaser.Scene {
   //callback for player/NPC overlap
   startDialogue(player, villager) {
     this.events.emit('villagerEncounter', villager)
-
   }
 
   //Creating animation sequence for player movement
