@@ -1,38 +1,29 @@
 import 'phaser'
 import Player from '../entity/Player'
 import InventoryItem from '../entity/InventoryItem'
-import { populateInventoryBar, setLevelConfig } from '../entity/utilityFunctions'
+import { setLevelConfig } from '../entity/utilityFunctions'
 import NPC from '../entity/NPC'
 // import { loadNextLevel } from '../entity/utilityFunctions'
-import {puzzleConfig, boxPuzzleLayer, wallPuzzleLayer, goalPuzzleLayer} from '../puzzles/converter'
+import {
+  boxPuzzleLayer,
+  wallPuzzleLayer,
+  goalPuzzleLayer
+} from '../puzzles/converter'
 import SokoBox from '../entity/SokoBox'
 import SokoGoal from '../entity/SokoGoal'
 import SokoWall from '../entity/SokoWall'
 
-// import {createUser, levelUp, retrieveUserLevel} from '../server/routes'
+import firebase from 'firebase'
+import { saveLevelProgression } from '../server/db'
 
 let groundLayer
 let objectLayer
 let map
 
-
 export default class WorldScene extends Phaser.Scene {
   constructor() {
     super('WorldScene')
-    this.levelConfig = {
-      level: 1,
-      itemsToAcquire: 3,
-      itemsAcquired: [],
-      NPC: 1,
-      mapHeight: 40,
-      mapWidth: 40,
-      puzzleOptions: {
-        width: 5,
-        height: 5,
-        boxes: 1,
-        minWalls: 3
-      }
-    }
+
     this.transitionToNextLevel = this.transitionToNextLevel.bind(this)
   }
 
@@ -75,13 +66,11 @@ export default class WorldScene extends Phaser.Scene {
       frameWidth: 16,
       frameHeight: 16
     })
-
-    //Load player level
-    //NOTE: this will not be static eventually
-    //this.levelConfig = setLevelConfig(2)
   }
 
-  create() {
+  create(data) {
+    this.levelConfig = data
+
     //fade into the scene
     this.cameras.main.fadeIn(500)
 
@@ -153,6 +142,9 @@ export default class WorldScene extends Phaser.Scene {
     this.createSokoGoalSprite(this.sokoGoals)
     this.createSokoWallSprite(this.sokoWalls)
 
+    // Setting our world bounds
+    this.physics.world.bounds.width = map.widthInPixels
+    this.physics.world.bounds.height = map.heightInPixels
 
     // Setting collision rules for player
     this.physics.add.collider(this.player, objectLayer) //Blocks off trees
@@ -162,8 +154,8 @@ export default class WorldScene extends Phaser.Scene {
       this.villagers,
       this.startDialogue,
       null,
-      this)
-
+      this
+    )
 
       //setting all puzzle collisions
     this.physics.add.collider(this.player, this.sokoBoxes, this.updateBoxMovement) //Player can push the puzzle boxes
@@ -206,14 +198,22 @@ export default class WorldScene extends Phaser.Scene {
     // Animating sprite motion
     this.createAnimations()
 
-
     const uiScene = this.scene.get('UIScene')
 
-    uiScene.events.once('startTransition', function () {
-      uiScene.inventoryBar.setVisible(false)
-      this.transitionToNextLevel(this.levelConfig.level)
-    }, this)
-
+    uiScene.events.once(
+      'startTransition',
+      function() {
+        uiScene.inventoryBar.setVisible(false)
+        this.transitionToNextLevel(this.levelConfig.level)
+        firebase.auth().currentUser.email
+          ? saveLevelProgression(
+              firebase.auth().currentUser.email,
+              this.levelConfig.level
+            )
+          : null
+      },
+      this
+    )
   }
   //end of create method
 
@@ -222,9 +222,9 @@ export default class WorldScene extends Phaser.Scene {
   randomizeItems(group, quantity) {
     let unique = []
     while (unique.length < quantity) {
-      let x = Phaser.Math.RND.between(200, 300);
-      let y = Phaser.Math.RND.between(200, 300);
-      let frame = Phaser.Math.RND.between(0, 63);
+      let x = Phaser.Math.RND.between(200, 300)
+      let y = Phaser.Math.RND.between(200, 300)
+      let frame = Phaser.Math.RND.between(0, 63)
 
       if (unique.indexOf(frame) === -1) {
         unique.push(frame)
@@ -235,13 +235,12 @@ export default class WorldScene extends Phaser.Scene {
     this.events.emit('newLevel')
   }
 
-
   randomizeNPCs(group, quantity) {
-    let unique = [];
+    let unique = []
     while (unique.length < quantity) {
-      let x = Phaser.Math.RND.between(200, 300);
-      let y = Phaser.Math.RND.between(200, 300);
-      let frame = Phaser.Math.RND.between(0, 8);
+      let x = Phaser.Math.RND.between(200, 300)
+      let y = Phaser.Math.RND.between(200, 300)
+      let frame = Phaser.Math.RND.between(0, 8)
 
       if (unique.indexOf(frame) === -1) {
         unique.push(frame)
@@ -252,17 +251,18 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   // hideNPCfood() {
-  //   for (let i = 0; i < this.villagers.getChildren().length; i++)
-  //   if (this.inventoryItems.getChildren()[i]) {
-  //     this.inventoryItems.getChildren()[i].disableBody(true).setVisible(true)
+  //   for (let i = 0; i < this.villagers.getChildren().length; i++) {
+  //     if (this.inventoryItems.getChildren()[i]) {
+  //       this.inventoryItems.getChildren()[i].disableBody(true).setVisible(true)
+  //     }
   //   }
   // }
 
 
 //Utility fxns for creating puzzle sprites
   createSokoBoxSprite(group) {
-    for (let i=0; i < 11; i++) {
-      for (let j=0; j < 11; j++) {
+    for (let i = 0; i < 11; i++) {
+      for (let j = 0; j < 11; j++) {
         if (boxPuzzleLayer['data'][i][j] === 28) {
           let x = j * 16 + 8; //16 = tile size and 8 = offset
           let y = i * 16 + 8; //16 = tile size and 8 = offset
@@ -276,8 +276,8 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   createSokoGoalSprite(group) {
-    for (let i=0; i < 11; i++) {
-      for (let j=0; j < 11; j++) {
+    for (let i = 0; i < 11; i++) {
+      for (let j = 0; j < 11; j++) {
         if (goalPuzzleLayer['data'][i][j] === 9) {
           let x = j * 16 + 8;
           let y = i * 16 + 8;
@@ -290,8 +290,8 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   createSokoWallSprite(group) {
-    for (let i=0; i < 11; i++) {
-      for (let j=0; j < 11; j++) {
+    for (let i = 0; i < 11; i++) {
+      for (let j = 0; j < 11; j++) {
         if (wallPuzzleLayer['data'][i][j] === 12) {
           let x = j * 16 + 8;
           let y = i * 16 + 8;
@@ -325,7 +325,9 @@ export default class WorldScene extends Phaser.Scene {
 
     this.levelConfig.itemsAcquired.push(item)
 
-    if (this.levelConfig.itemsAcquired.length === this.levelConfig.itemsToAcquire) {
+    if (
+      this.levelConfig.itemsAcquired.length === this.levelConfig.itemsToAcquire
+    ) {
       this.events.emit('levelComplete', this.levelConfig.level, item.frame.name)
     } else {
       this.events.emit('itemFound', item.frame.name)
@@ -351,7 +353,6 @@ export default class WorldScene extends Phaser.Scene {
   //callback for player/NPC overlap
   startDialogue(player, villager) {
     this.events.emit('villagerEncounter', villager)
-
   }
 
   //Creating animation sequence for player movement
@@ -424,7 +425,6 @@ export default class WorldScene extends Phaser.Scene {
   update(time, delta) {
     this.player.update(this.cursors)
   }
-
 }
 
 function randomizeWorld() {
@@ -443,8 +443,6 @@ function randomizeWorld() {
   ])
 
   // // Clear out a rectangle of empty space for sokoban puzzle (top left)
-  objectLayer.fill(-1, 0, 0, 12, 12); //clear out any objects for collisions
-  groundLayer.fill(22, 0, 0, 11, 11); //yellow tile for puzzlefor plain green: use 22 instead of 85
-
+  objectLayer.fill(-1, 0, 0, 12, 12) //clear out any objects for collisions
+  groundLayer.fill(22, 0, 0, 11, 11) //yellow tile for puzzlefor plain green: use 22 instead of 85
 }
-
