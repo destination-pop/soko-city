@@ -7,6 +7,6 @@ export default class MainScene extends Phaser.Scene {
 
   create() {
     //Start the scene with the title scene
-    this.scene.launch('TitleScene')
+    this.scene.start('TitleScene')
   }
 }
