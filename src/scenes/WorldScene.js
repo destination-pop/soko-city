@@ -358,6 +358,7 @@ export default class WorldScene extends Phaser.Scene {
       return goal.isTinted
     })) {
       this.events.emit('puzzleSolved', this.inventoryItems)
+      this.events.off('villagerEncounter')
     }
   }
 

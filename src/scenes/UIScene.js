@@ -89,12 +89,8 @@ export default class UIScene extends Phaser.Scene {
 
 
     //launching text box on villager encounter
-    currentGame.events.once('villagerEncounter', function(villager) {
+    currentGame.events.on('villagerEncounter', function(villager) {
       textBox.setVisible(true).start(initialVillagerDialog(currentGame, villager, foodNames), 50)
-    }, this)
-
-    currentGame.events.once('villagerReward', function(villager) {
-      textBox.setVisible(true).start(itemFromVillagerDialog(currentGame, villager, foodNames), 50)
     }, this)
 
 
@@ -235,10 +231,6 @@ const initialVillagerDialog = (scene, villager, foodNames) => {
   let inventoryNum = scene.inventoryItems.children.entries[villagerNum].frame.name
 
   return `Ah, you're the stranger looking for their pet chicken?  I'm afraid I can't do anything until I solve this mysterious puzzle in my yard!  Could you help me solve it??  I would gladly repay you with a ${foodNames[inventoryNum]}!`
-}
-
-const itemFromVillagerDialog = (scene, foodItem, foodNames) => {
-  return `Thank you so much for your help, you are brilliant!  Here is the ${foodNames[foodItem]} I promised you!`
 }
 
 const puzzleSolvedDialog = `You've solved it!  Go to the villager to collect your reward.`
