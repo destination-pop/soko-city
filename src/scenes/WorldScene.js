@@ -110,13 +110,12 @@ export default class WorldScene extends Phaser.Scene {
 
     randomizeWorld() // Initial map randomization
 
-    //creating random items for scene and updating UI with items in scene
+    // If 3x3 area around (4, 3) is empty, we'll spawn our player here
+    // Otherwise, it will keep searching for a good spot
+    this.randomizePlayerSpawn(15, 15)
 
-    this.inventoryItems = this.physics.add.group({
-      classType: InventoryItem
-    })
-
-    this.randomizeItems(this.inventoryItems, this.levelConfig.itemsToAcquire)
+    // Setting keyboard input for movement
+    this.cursors = this.input.keyboard.createCursorKeys()
 
     //creating random villagers
     this.villagers = this.physics.add.group({
@@ -125,16 +124,15 @@ export default class WorldScene extends Phaser.Scene {
     })
     this.villagers.enableBody = true;
 
-
     this.randomizeNPCs(this.villagers, this.levelConfig.NPC)
-    // this.hideNPCItems(this.inventoryItems, this.villagers)
 
-    // If 3x3 area around (4, 3) is empty, we'll spawn our player here
-    // Otherwise, it will keep searching for a good spot
-    this.randomizePlayerSpawn(15, 15)
 
-    // Setting keyboard input for movement
-    this.cursors = this.input.keyboard.createCursorKeys()
+    //creating random items for scene and updating UI with items in scene
+    this.inventoryItems = this.physics.add.group({
+      classType: InventoryItem
+    })
+
+    this.randomizeItems(this.inventoryItems, this.levelConfig.itemsToAcquire)
 
   
     //Making Puzzle Sprites:
@@ -252,6 +250,13 @@ export default class WorldScene extends Phaser.Scene {
       }
     }
   }
+
+  // hideNPCfood() {
+  //   for (let i = 0; i < this.villagers.getChildren().length; i++)
+  //   if (this.inventoryItems.getChildren()[i]) {
+  //     this.inventoryItems.getChildren()[i].disableBody(true).setVisible(true)
+  //   }
+  // }
 
 
 //Utility fxns for creating puzzle sprites
