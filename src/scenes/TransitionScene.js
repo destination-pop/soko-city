@@ -2,26 +2,27 @@ import 'phaser'
 
 class TransitionScene extends Phaser.Scene {
   constructor() {
-    super('TransitionScene')
-    this.handleClick = this.handleClick.bind(this)
+    super('TransitionScene');
   }
 
-  create(data) {
-    this.add.text(120, 100, 'Level Complete', { fontSize: '50px' })
+	create(data) {
+    this.add.text(110,100, 'Level Complete', {fontSize: '50px'});
 
-    const text = this.add.text(220, 320, 'ready for next level', {
-      fontSize: '30px'
-    })
-    text.setInteractive({ useHandCursor: true })
-    text.on('pointerdown', () => this.handleClick())
+    this.add.text(100,240, 'You solved the challenge.', {fontSize: '30px'})
+    this.add.text(145,280, 'But where is Lola?', {fontSize: '30px'})
+    this.add.text(110,320, 'Better keep searching...', {fontSize: '30px'})
+
     this.levelConfig = data
+
+    this.time.addEvent({
+      delay: 3500,
+      callback: () => {
+        this.scene.start('WorldScene');
+        // this.scene.launch('UIScene');
+        this.scene.bringToTop('UIScene')      }
+    })
   }
 
-  handleClick() {
-    this.scene.start('WorldScene', this.levelConfig)
-    // this.scene.launch('UIScene')
-    this.scene.bringToTop('UIScene')
-  }
 }
 
 export default TransitionScene
