@@ -98,44 +98,41 @@ export default class WorldScene extends Phaser.Scene {
 
     this.randomizeWorld() // Initial map randomization
 
-    // If 3x3 area around (4, 3) is empty, we'll spawn our player here
-    // Otherwise, it will keep searching for a good spot
-    this.randomizePlayerSpawn(15, 15)
-
-    // Setting keyboard input for movement
-    this.cursors = this.input.keyboard.createCursorKeys()
-
-    //creating random villagers
-    this.villagers = this.physics.add.group({
-      classType: NPC,
-      immovable: true
-    })
-    this.villagers.enableBody = true;
-
-    this.randomizeNPCs(this.villagers, this.levelConfig.NPC)
-
-
     //creating random items for scene and updating UI with items in scene
+
     this.inventoryItems = this.physics.add.group({
       classType: InventoryItem
     })
 
     this.randomizeItems(this.inventoryItems, this.levelConfig.itemsToAcquire)
 
-  
+    //creating random villagers
+    this.villagers = this.physics.add.group({
+      classType: NPC,
+      immovable: true
+    })
+    this.villagers.enableBody = true
+
+    this.randomizeNPCs(this.villagers, this.levelConfig.NPC)
+
+    // If 3x3 area around (4, 3) is empty, we'll spawn our player here
+    // Otherwise, it will keep searching for a good spot
+    this.randomizePlayerSpawn(15, 15)
+
     //Making Puzzle Sprites:
     //Creating sokoban puzzle sprites' physics group:
     this.sokoBoxes = this.physics.add.group({
       classType: SokoBox
     })
 
-    this.sokoGoals = this.physics.add.group()
+    this.sokoGoals = this.physics.add.group({
+      classType: SokoGoal
+    })
 
     this.sokoWalls = this.physics.add.group({
       classType: SokoWall,
       immovable: true
     })
-    this.sokoWalls.enableBody = true
 
     //Creating sokoBoxes, sokoGoals, and sokoWalls for puzzle
     this.createSokoBoxSprite(this.sokoBoxes)
@@ -157,29 +154,16 @@ export default class WorldScene extends Phaser.Scene {
       this
     )
 
-      //setting all puzzle collisions
-    this.physics.add.collider(this.player, this.sokoBoxes, this.updateBoxMovement) //Player can push the puzzle boxes
-
+    this.physics.add.collider(this.player, this.sokoBoxes) //Player can push the puzzle boxes
     this.physics.add.collider(this.player, this.sokoWalls) //Player can't move through puzzle walls
-
-    this.physics.add.collider(this.sokoBoxes, this.sokoWalls)
+    this.physics.add.collider(this.sokoBoxes, [this.sokoWalls, this.sokoBoxes])
     this.physics.add.collider(this.sokoBoxes, this.sokoBoxes)
-  
-    //adding overlap for picking up items
+
     this.physics.add.overlap(
       this.player,
       this.inventoryItems,
       this.pickUpItem,
       null,
-      this
-    )
-
-    // adding overlap for puzzle boxes on goals
-    this.physics.add.overlap(
-      this.sokoBoxes,
-      this.sokoGoals,
-      this.puzzleSolve,
-      null, 
       this
     )
 
@@ -194,6 +178,9 @@ export default class WorldScene extends Phaser.Scene {
 
     this.cameras.main.roundPixels = true
     this.cameras.main.setZoom(2)
+
+    // Setting keyboard input for movement
+    this.cursors = this.input.keyboard.createCursorKeys()
 
     // Animating sprite motion
     this.createAnimations()
@@ -250,26 +237,21 @@ export default class WorldScene extends Phaser.Scene {
     }
   }
 
-  // hideNPCfood() {
-  //   for (let i = 0; i < this.villagers.getChildren().length; i++) {
-  //     if (this.inventoryItems.getChildren()[i]) {
-  //       this.inventoryItems.getChildren()[i].disableBody(true).setVisible(true)
-  //     }
-  //   }
-  // }
-
-
-//Utility fxns for creating puzzle sprites
+  //Utility fxns for creating puzzle sprites
   createSokoBoxSprite(group) {
     for (let i=0; i < this.levelConfig.puzzleOptions.height; i++) {
       for (let j=0; j < this.levelConfig.puzzleOptions.width; j++) {
         if (this.levelConfig.puzzleLayers.box.data[i][j] === 28) {
           let x = j * 16 + this.levelConfig.puzzleOptions.x; //16 = tile size
           let y = i * 16 + this.levelConfig.puzzleOptions.y; //16 = tile size
-          let sokoBoxSprite = new SokoBox(this, x, y, 'sokoboxes');
-          sokoBoxSprite.setSize(50, 50)
-          sokoBoxSprite.setScale(0.25);
-          group.add(sokoBoxSprite);
+          let sokoBoxSprite = this.physics.add.image(x, y, 'sokoboxes');
+          sokoBoxSprite.enableBody = true
+          sokoBoxSprite.setFriction(10000, 10000)
+          sokoBoxSprite.body.setCollideWorldBounds(true)
+          // sokoBoxSprite.body.setAcceleration(0,0); //only moves as much as it is pushed by the player
+          // sokoBoxSprite.body.setDrag(10000, 10000)
+          sokoBoxSprite.setScale(0.25)
+          group.add(sokoBoxSprite)
         }
       }
     }
@@ -281,9 +263,9 @@ export default class WorldScene extends Phaser.Scene {
         if (this.levelConfig.puzzleLayers.goal.data[i][j] === 9) {
           let x = j * 16 + this.levelConfig.puzzleOptions.x;
           let y = i * 16 + this.levelConfig.puzzleOptions.y;
-          let sokoGoalSprite = new SokoGoal(this, x, y, 'sokogoals')
-          sokoGoalSprite.setScale(0.25);
-          group.add(sokoGoalSprite);
+          let sokoGoalSprite = this.physics.add.image(x, y, 'sokogoals')
+          sokoGoalSprite.setScale(0.25)
+          group.add(sokoGoalSprite)
         }
       }
     }
@@ -295,10 +277,9 @@ export default class WorldScene extends Phaser.Scene {
         if (this.levelConfig.puzzleLayers.wall.data[i][j] === 12) {
           let x = j * 16 + this.levelConfig.puzzleOptions.x;
           let y = i * 16 + this.levelConfig.puzzleOptions.y;
-          let sokoWallSprite = new SokoWall(this, x, y, 'sokowalls');
-          sokoWallSprite.setSize(50, 50)
-          sokoWallSprite.setScale(0.25)
-          group.add(sokoWallSprite)
+          let sokoWallSprite = this.physics.add.image(x, y, 'sokowalls');
+          sokoWallSprite.setScale(0.25);
+          group.add(sokoWallSprite);
         }
       }
     }
@@ -312,7 +293,6 @@ export default class WorldScene extends Phaser.Scene {
       callback: () => {
         //Jas's note:  is this the correct place to increment level
         this.levelConfig = setLevelConfig(this.levelConfig.level + 1)
-        this.events.off('update')
         this.scene.start('TransitionScene', this.levelConfig)
       }
     })
@@ -329,25 +309,15 @@ export default class WorldScene extends Phaser.Scene {
       this.levelConfig.itemsAcquired.length === this.levelConfig.itemsToAcquire
     ) {
       this.events.emit('levelComplete', this.levelConfig.level, item.frame.name)
+      console.log('Level Completed: ', this.levelConfig.level)
     } else {
       this.events.emit('itemFound', item.frame.name)
     }
-  }
 
-  updateBoxMovement (player, box) {
-    box.update()
-  }
-
-  puzzleSolve (box, goal) {
-    goal.setTint(0xFF00FF)
-    goal.disableBody(true, false)
-
-    let allGoals = this.sokoGoals.getChildren()
-    if (allGoals.every(function (goal) {
-      return goal.isTinted
-    })) {
-      this.events.emit('puzzleSolved')
-    }
+    // launch itemAcquiredDialog on puzzle solve
+    // else {
+    //   this.events.emit('itemFromVillager', item.frame.name)
+    // }
   }
 
   //callback for player/NPC overlap
@@ -416,7 +386,9 @@ export default class WorldScene extends Phaser.Scene {
 
     if (collisionCheck.every(e => e === -1)) {
       this.player = new Player(this, x * 16, y * 16, 'player')
-      this.player.setSize(11, 11)
+      this.player.body.width = 11
+      this.player.body.height = 11
+      this.player.body.setOffset(2.5, 1)
     } else {
       this.randomizePlayerSpawn(x + 1, y + 1)
     }

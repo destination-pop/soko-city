@@ -6,6 +6,7 @@ import WorldScene from '../scenes/WorldScene'
 import UIScene from '../scenes/UIScene'
 import TitleScene from '../scenes/TitleScene'
 import TransitionScene from '../scenes/TransitionScene'
+import IntroScene from '../scenes/IntroScene'
 import React from 'react'
 
 class phaserGame extends Phaser.Game {
@@ -18,6 +19,7 @@ class phaserGame extends Phaser.Game {
     this.scene.add('WorldScene', WorldScene)
     this.scene.add('UIScene', UIScene)
     this.scene.add('TransitionScene', TransitionScene)
+    this.scene.add('IntroScene', IntroScene)
 
     //Start the game with the main scene
     this.scene.start('MainScene')
