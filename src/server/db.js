@@ -1,7 +1,6 @@
 import { db } from '../config/firebaseConfig'
 
 const games = db.collection('games')
-import 'babel-polyfill'
 
 export function saveLevelProgression(signedInUser, currentLevel) {
   games

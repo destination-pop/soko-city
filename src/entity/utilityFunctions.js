@@ -4,7 +4,6 @@ import { convertToMapLayers } from '../puzzles/converter'
 
 //Sets levelConfig variables for a scene to load user's current level
 function setLevelConfig(level) {
-  let level = level || 1
 
   //Randomize puzzle placement
   let puzzHeight = (level * 2) + 3 //unit: squares
