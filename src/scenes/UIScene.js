@@ -26,6 +26,7 @@ export default class UIScene extends Phaser.Scene {
     //pulling information from World Scene
     const currentGame = this.scene.get('WorldScene')
 
+    // const mainGameSong = this.sound.start('windlessSlopes')
     // initializing text box for quests
     const textBox = this.rexUI.add.textBox({
       x: 100,

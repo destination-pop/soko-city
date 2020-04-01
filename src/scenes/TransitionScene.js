@@ -6,7 +6,6 @@ class TransitionScene extends Phaser.Scene {
   }
 
 	create(data) {
-    console.log(data)
     this.add.text(110,100, 'Level Complete', {fontSize: '50px'});
 
     this.add.text(100,240, 'You solved the challenge.', {fontSize: '30px'})
