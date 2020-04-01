@@ -78,8 +78,6 @@ export default class UIScene extends Phaser.Scene {
     //initializing inventory bar
     this.inventoryBar = this.add.group()
 
-    setTimeout(populateInventoryBar(this, currentGame.inventoryItems.children.entries, foodNames), 3000)
-
     //launching text box for initial quest and populating inventory bar
     currentGame.events.on('newLevel', function () {
       this.inventoryBar.setVisible(true)

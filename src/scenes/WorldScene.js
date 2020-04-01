@@ -214,6 +214,9 @@ export default class WorldScene extends Phaser.Scene {
     }, this)
 
   }
+  //end of create method
+
+
 
   randomizeItems(group, quantity) {
     let unique = []
@@ -259,8 +262,6 @@ export default class WorldScene extends Phaser.Scene {
           sokoBoxSprite.enableBody = true
           sokoBoxSprite.setFriction(10000, 10000)
           sokoBoxSprite.body.setCollideWorldBounds(true)
-          // sokoBoxSprite.body.setAcceleration(0,0); //only moves as much as it is pushed by the player
-          // sokoBoxSprite.body.setDrag(10000, 10000)
           sokoBoxSprite.setScale(0.25);
           group.add(sokoBoxSprite);
         }
@@ -332,22 +333,6 @@ export default class WorldScene extends Phaser.Scene {
     this.events.emit('villagerEncounter', villager)
 
   }
-
-  //Callback for moving box
-  moveBox(player, sokoBoxSprite) {
-    player.setVelocityX(0)
-    player.setVelocityY(0)
-    sokoBoxSprite.setVelocity(0)
-    sokoBoxSprite.setVelocityY(0)
-  }
-
-  // //Callback for boxes not going through walls
-  // boxesCantGoThruWalls(player, sokoBoxSprite) {
-  //   player.setVelocityX(0)
-  //   player.setVelocityY(0)
-  //   sokoBoxSprite.setVelocityX(0)
-  //   sokoBoxSprite.setVelocityY(0)
-  // }
 
   //Creating animation sequence for player movement
   createAnimations() {
