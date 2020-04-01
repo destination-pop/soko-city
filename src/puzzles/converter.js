@@ -71,7 +71,6 @@ function convertToSingleMapLayer(twoDimArray, charSet, tileIdx) {
    if (tileIdx === wallIdx) {
       singleMapLayer[singleMapLayer.length-1][singleMapLayer[0].length-2] = blankIdx
    }
-
    return singleMapLayer
 }
 
