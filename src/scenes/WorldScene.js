@@ -135,6 +135,7 @@ export default class WorldScene extends Phaser.Scene {
       classType: SokoWall,
       immovable: true
     })
+    this.sokoWalls.enableBody = true
 
     //Creating sokoBoxes, sokoGoals, and sokoWalls for puzzle
     this.createSokoBoxSprite(this.sokoBoxes)
@@ -265,7 +266,6 @@ export default class WorldScene extends Phaser.Scene {
         if (this.levelConfig.puzzleLayers.box.data[i][j] === 28) {
           let x = j * 16 + this.levelConfig.puzzleOptions.x; //16 = tile size
           let y = i * 16 + this.levelConfig.puzzleOptions.y; //16 = tile size
-          let sokoBoxSprite = this.physics.add.image(x, y, 'sokoboxes');
           let sokoBoxSprite = new SokoBox(this, x, y, 'sokoboxes');
           sokoBoxSprite.setSize(50, 50)
           sokoBoxSprite.setScale(0.25);
@@ -298,6 +298,7 @@ export default class WorldScene extends Phaser.Scene {
           let sokoWallSprite = new SokoWall(this, x, y, 'sokowalls');
           sokoWallSprite.setSize(50, 50)
           sokoWallSprite.setScale(0.25)
+          group.add(sokoWallSprite)
         }
       }
     }
