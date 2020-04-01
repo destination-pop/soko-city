@@ -1,49 +1,56 @@
+import { createGeneratorConfig, generatePuzzle } from '../puzzles/generator'
+import { convertToMapLayers } from '../puzzles/converter'
 
-let currentPuzzleConfig =  {
-  x: 40, //Unit: Pixels
-  y: 40,
-  width: 5, //Unit: 16px squares. Not including perimeter
-  height: 5,
-  boxes: 2,
-  minWalls: 6
-}
 
 //Sets levelConfig variables for a scene to load user's current level
 function setLevelConfig(level) {
 
   //Randomize puzzle placement
   let puzzHeight = (level * 2) + 3 //unit: squares
-  let mapHeight = (level + 3) * 10 //unit: squares
+  let mapHeight = (level + 2) * 10 //unit: squares
   let minPuzzPlacement = 2 //Topmost appropriate point for puzzle, in tiles
   let maxPuzzPlacement = mapHeight - puzzHeight - 3 //Ditto for bottom-most
-  let xPuzz = 16*(Math.random()*maxPuzzPlacement - minPuzzPlacement) + minPuzzPlacement + 8
-  let yPuzz = 16*(Math.random()*maxPuzzPlacement - minPuzzPlacement) + minPuzzPlacement + 8
+  let xPuzz = 16*(Math.floor(Math.random()*(maxPuzzPlacement - minPuzzPlacement)) + minPuzzPlacement)
+  let yPuzz = 16*(Math.floor(Math.random()*(maxPuzzPlacement - minPuzzPlacement)) + minPuzzPlacement)
 
-  let config = {
+  //Create puzzle for level
+  let options = {
+    width: (level * 2) + 3, //Unit: 16px squares (without perimeter)
+    height: (level * 2) + 3,
+    boxes: Math.floor(level/2) + 1,
+    minWalls: level + 5
+  }
+
+  //Create map layers for the puzzle sprites
+  let rawPuzzle = generatePuzzle(createGeneratorConfig(options))
+  // console.log(rawPuzzle)
+  let layers = convertToMapLayers(rawPuzzle)
+
+  //Set config for the level and return to WorldScene
+  return {
     level: level,
     itemsToAcquire: level + 2,
     itemsAcquired: [],
-    NPC: level % 3 + 1, //This is also the number of puzzles
-    mapWidth: (level + 3) * 10, //Unit: 16px squares
-    mapHeight: (level + 3) * 10,
+    NPC: 1, //This is also the number of puzzles
+    mapWidth: (level + 2) * 10, //Unit: 16px squares
+    mapHeight: (level + 2) * 10,
     puzzleOptions: {
       x: xPuzz, //Unit: Pixels
       y: yPuzz,
-      width: (level * 2) + 3, //Unit: 16px squares (without perimeter)
-      height: (level * 2) + 3,
-      boxes: (level % 2) + 1,
-      minWalls: level + 5
+      width: (level * 2) + 5, //Unit: 16px squares (with perimeter)
+      height: (level * 2) + 5,
+      boxes: Math.floor(level/2) + 1,
+      minWalls: level + 7
+    },
+    puzzleLayers: {
+      box: layers.boxPuzzleLayer,
+      goal: layers.goalPuzzleLayer,
+      wall: layers.wallPuzzleLayer
     }
   }
-
-  currentPuzzleConfig = config //Set puzzle config for generator
-  config.puzzleOptions.width += 2 //account for the perimeter
-  config.puzzleOptions.height += 2
-
-  return config //Send back to WorldScene
 }
 
+
 export {
-  currentPuzzleConfig,
   setLevelConfig
 }

@@ -26,4 +26,11 @@ function createGeneratorConfig(options) {
   }
 }
 
-export default sokobanGenerator.generateSokobanLevel(createGeneratorConfig(currentPuzzleConfig))
+function generatePuzzle(config) {
+  return sokobanGenerator.generateSokobanLevel(createGeneratorConfig(config))
+}
+
+export {
+  createGeneratorConfig,
+  generatePuzzle
+}

@@ -3,12 +3,9 @@ import Player from '../entity/Player'
 import InventoryItem from '../entity/InventoryItem'
 import { setLevelConfig } from '../entity/utilityFunctions'
 import NPC from '../entity/NPC'
-import { boxPuzzleLayer, wallPuzzleLayer, goalPuzzleLayer } from '../puzzles/converter'
 import SokoBox from '../entity/SokoBox'
 import SokoGoal from '../entity/SokoGoal'
 import SokoWall from '../entity/SokoWall'
-
-// import {createUser, levelUp, retrieveUserLevel} from '../server/routes'
 
 let groundLayer
 let objectLayer
@@ -19,19 +16,24 @@ export default class WorldScene extends Phaser.Scene {
   constructor() {
     super('WorldScene')
     this.levelConfig = {
-      level: 1,
+      level: 0,
       itemsToAcquire: 3,
       itemsAcquired: [],
       NPC: 1,
       mapHeight: 40, //Unit: 16px squares
       mapWidth: 40,
       puzzleOptions: {
-        x: 40, //Unit: pixels
-        y: 40,
+        x: 32, //Unit: pixels
+        y: 32,
         width: 7, //Unit: 16px squares, includes perimeter
         height: 7,
         boxes: 1,
         minWalls: 3
+      },
+      puzzleLayers: {
+        box: {},
+        goal: {},
+        wall: {}
       }
     }
 
@@ -81,6 +83,8 @@ export default class WorldScene extends Phaser.Scene {
       frameWidth: 16,
       frameHeight: 16
     })
+
+    this.levelConfig = setLevelConfig(this.levelConfig.level+1)
   }
 
   create() {
@@ -248,7 +252,7 @@ export default class WorldScene extends Phaser.Scene {
   createSokoBoxSprite(group) {
     for (let i=0; i < this.levelConfig.puzzleOptions.height; i++) {
       for (let j=0; j < this.levelConfig.puzzleOptions.width; j++) {
-        if (boxPuzzleLayer['data'][i][j] === 28) {
+        if (this.levelConfig.puzzleLayers.box.data[i][j] === 28) {
           let x = j * 16 + this.levelConfig.puzzleOptions.x; //16 = tile size
           let y = i * 16 + this.levelConfig.puzzleOptions.y; //16 = tile size
           let sokoBoxSprite = this.physics.add.image(x, y, 'sokoboxes');
@@ -267,7 +271,7 @@ export default class WorldScene extends Phaser.Scene {
   createSokoGoalSprite(group) {
     for (let i=0; i < this.levelConfig.puzzleOptions.height; i++) {
       for (let j=0; j < this.levelConfig.puzzleOptions.width; j++) {
-        if (goalPuzzleLayer['data'][i][j] === 9) {
+        if (this.levelConfig.puzzleLayers.goal.data[i][j] === 9) {
           let x = j * 16 + this.levelConfig.puzzleOptions.x;
           let y = i * 16 + this.levelConfig.puzzleOptions.y;
           let sokoGoalSprite = this.physics.add.image(x, y, 'sokogoals')
@@ -281,7 +285,7 @@ export default class WorldScene extends Phaser.Scene {
   createSokoWallSprite(group) {
     for (let i=0; i < this.levelConfig.puzzleOptions.height; i++) {
       for (let j=0; j < this.levelConfig.puzzleOptions.width; j++) {
-        if (wallPuzzleLayer['data'][i][j] === 12) {
+        if (this.levelConfig.puzzleLayers.wall.data[i][j] === 12) {
           let x = j * 16 + this.levelConfig.puzzleOptions.x;
           let y = i * 16 + this.levelConfig.puzzleOptions.y;
           let sokoWallSprite = this.physics.add.image(x, y, 'sokowalls');
@@ -298,9 +302,7 @@ export default class WorldScene extends Phaser.Scene {
     this.time.addEvent({
       delay: 500,
       callback: () => {
-        this.levelConfig = setLevelConfig(this.levelConfig.level+1)
-        this.scene.start('TransitionScene');
-        // In progress, we can add other level-up activities here
+        this.scene.start('TransitionScene')
       }
     })
   }
@@ -435,12 +437,10 @@ export default class WorldScene extends Phaser.Scene {
       { index: 112, weight: 2 } // Small Tree
     ])
 
-    const x = (this.levelConfig.puzzleOptions.x - 24) /16
-    const y = (this.levelConfig.puzzleOptions.y - 24) /16
-    const width = (this.levelConfig.puzzleOptions.width + 2)
-    const height = (this.levelConfig.puzzleOptions.height + 2)
-
-    console.log(x,' | ',y,' | ',width,' | ',height)
+    const x = (this.levelConfig.puzzleOptions.x / 16) - 1 //Unit: tiles
+    const y = (this.levelConfig.puzzleOptions.y / 16) - 1
+    const width = this.levelConfig.puzzleOptions.width + 2 //Unit: Tiles
+    const height = this.levelConfig.puzzleOptions.height + 2
 
     // Clear out a rectangle of empty space for sokoban puzzle (top left)
     objectLayer.fill(-1, x, y, width, height); //clear out any objects for collisions
