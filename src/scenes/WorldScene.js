@@ -207,6 +207,9 @@ export default class WorldScene extends Phaser.Scene {
       this
     )
   }
+  //end of create method
+
+
 
   randomizeItems(group, quantity) {
     let unique = []
@@ -327,22 +330,6 @@ export default class WorldScene extends Phaser.Scene {
   startDialogue(player, villager) {
     this.events.emit('villagerEncounter', villager)
   }
-
-  //Callback for moving box
-  moveBox(player, sokoBoxSprite) {
-    player.setVelocityX(0)
-    player.setVelocityY(0)
-    sokoBoxSprite.setVelocity(0)
-    sokoBoxSprite.setVelocityY(0)
-  }
-
-  // //Callback for boxes not going through walls
-  // boxesCantGoThruWalls(player, sokoBoxSprite) {
-  //   player.setVelocityX(0)
-  //   player.setVelocityY(0)
-  //   sokoBoxSprite.setVelocityX(0)
-  //   sokoBoxSprite.setVelocityY(0)
-  // }
 
   //Creating animation sequence for player movement
   createAnimations() {

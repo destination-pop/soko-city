@@ -49,6 +49,7 @@ class TitleScene extends Phaser.Scene {
           this.scene.start('WorldScene', levelConfig)
           this.scene.launch('UIScene')
           this.scene.bringToTop('UIScene')
+
         }
       })
     }
