@@ -42,6 +42,7 @@ export default class WorldScene extends Phaser.Scene {
     this.createSokoGoalSprite = this.createSokoGoalSprite.bind(this)
     this.createSokoWallSprite = this.createSokoWallSprite.bind(this)
     this.randomizeWorld = this.randomizeWorld.bind(this)
+    this.transitionToNextLevel = this.transitionToNextLevel.bind(this)
   }
 
   preload() {
