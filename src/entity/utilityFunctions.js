@@ -1,7 +1,6 @@
 import { createGeneratorConfig, generatePuzzle } from '../puzzles/generator'
 import { convertToMapLayers } from '../puzzles/converter'
 
-
 //Sets levelConfig variables for a scene to load user's current level
 function setLevelConfig(level) {
 

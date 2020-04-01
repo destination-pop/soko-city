@@ -89,20 +89,14 @@ export default class UIScene extends Phaser.Scene {
 
 
     //launching text box on villager encounter
-    currentGame.events.on('villagerEncounter', function(villager) {
+    currentGame.events.once('villagerEncounter', function(villager) {
       textBox.setVisible(true).start(initialVillagerDialog(currentGame, villager, foodNames), 50)
     }, this)
 
+    currentGame.events.once('villagerReward', function(villager) {
+      textBox.setVisible(true).start(itemFromVillagerDialog(currentGame, villager, foodNames), 50)
+    }, this)
 
-    //updating inventory bar on item acquired, launching itemFromVillagerDialog
-    // currentGame.events.on('itemFromVillager', function(item) {
-    //   this.inventoryBar.children.entries.forEach(el => {
-    //     if (item === el.frame.name) {
-    //       el.clearTint()
-    //       textBox.setVisible(true).start(itemFromVillagerDialog(currentGame, el.frame.name, foodNames), 50)
-    //     }
-    //   })
-    // }, this)
 
     //launching itemFoundDialog
     currentGame.events.on('itemFound', function(item) {
@@ -200,9 +194,9 @@ const foodNames = {
   39: 'pickle',
   40: 'pretzel',
   41: 'salami',
-  42: 'salmon',
+  42: 'salmon steak',
   43: 'jar of honey',
-  44: 'beef jerky',
+  44: 'beef jerky slab',
   45: 'red potato',
   46: 'honeydew',
   47: 'cantaloupe',
@@ -219,7 +213,7 @@ const foodNames = {
   58: 'prawn',
   59: 'giant olive',
   60: 'jar of pickled eggs',
-  61: 'mystery meat',
+  61: 'hunk of mystery meat',
   62: 'sweet onion',
   63: 'shrimp'
 }
@@ -240,12 +234,12 @@ const initialVillagerDialog = (scene, villager, foodNames) => {
   let villagerNum = scene.villagers.children.entries.indexOf(villager)
   let inventoryNum = scene.inventoryItems.children.entries[villagerNum].frame.name
 
-  return `Ah, you're the stranger looking for their pet chicken?  I'm afraid I can't do anything until I solve this mysterious puzzle in my yard!  Could you help me solve it??  I would gladly repay you with this ${foodNames[inventoryNum]}!`
+  return `Ah, you're the stranger looking for their pet chicken?  I'm afraid I can't do anything until I solve this mysterious puzzle in my yard!  Could you help me solve it??  I would gladly repay you with a ${foodNames[inventoryNum]}!`
 }
 
-// const itemFromVillagerDialog = (scene, foodItem, foodNames) => {
-//   return `Thank you so much for solving this puzzle, you are brilliant!  Here is the ${foodNames[foodItem]} I promised you!`
-// }
+const itemFromVillagerDialog = (scene, foodItem, foodNames) => {
+  return `Thank you so much for your help, you are brilliant!  Here is the ${foodNames[foodItem]} I promised you!`
+}
 
 const puzzleSolvedDialog = `You've solved it!  Go to the villager to collect your reward.`
 
