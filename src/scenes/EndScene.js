@@ -26,28 +26,16 @@ class EndScene extends Phaser.Scene {
       callback: () => {
         this.game.react.setState(prev => {
           return {
-            restart: !prev.restartGame
+            restart: !prev.restart
           }
         })
         this.sys.game.destroy(true)
-        restartGame(firebase.auth().currentUser.email)
+        firebase.auth().currentUser.email
+          ? restartGame(firebase.auth().currentUser.email)
+          : null
       }
     })
   }
-  // }, this);
-
-  // const goBackToTitle = () => {
-  //   this.time.addEvent({
-  //     delay: 500,
-  //     callback: () => {
-  //       restartGame(firebase.auth().currentUser.email)
-  //       console.log('hello, callback')
-  //       this.scene.start('TitleScene')
-  //     }
-  //   })
 }
-//esther: nothing is set up for the handle click routing call because I wanted to let you set it up properly
-// }
-// }
 
 export default EndScene

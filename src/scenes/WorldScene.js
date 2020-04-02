@@ -214,6 +214,8 @@ export default class WorldScene extends Phaser.Scene {
       inventoryItems.getChildren()[0].enableBody()
     })
 
+    // this.sokoGoals.getChildren().forEach(goal => goal.setTint(0xFF00FF))
+
     const uiScene = this.scene.get('UIScene')
 
     uiScene.events.once(
@@ -222,7 +224,7 @@ export default class WorldScene extends Phaser.Scene {
         uiScene.inventoryBar.setVisible(false)
         this.transitionToNextLevel()
 
-        if (this.levelConfig.level === 5) {
+        if (this.levelConfig.level === 1) {
           firebase.auth().currentUser.email
             ? endGame(firebase.auth().currentUser.email)
             : null
@@ -246,7 +248,7 @@ export default class WorldScene extends Phaser.Scene {
     this.time.addEvent({
       delay: 500,
       callback: () => {
-        if (this.levelConfig.level === 5) {
+        if (this.levelConfig.level === 1) {
           this.events.off('update')
           this.scene.start('EndScene')
         } else {
