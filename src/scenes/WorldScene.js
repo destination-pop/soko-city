@@ -340,6 +340,7 @@ export default class WorldScene extends Phaser.Scene {
     } else {
       this.events.emit('itemFound', item.frame.name)
     }
+  }
 
   updateBoxMovement (player, box) {
     box.update()
