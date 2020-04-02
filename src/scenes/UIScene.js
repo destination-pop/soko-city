@@ -178,13 +178,13 @@ export default class UIScene extends Phaser.Scene {
 
 //to populate inventory bar from world scene info
 const populateInventoryBar = (scene, itemArr) => {
-  let currentX = 48
+  let currentX = 35
   itemArr.forEach(item => {
-    scene.inventoryBar.create(currentX, 450, 'graySquare').setScale(3)
+    scene.inventoryBar.create(currentX, 445, 'graySquare').setScale(3)
     scene.inventoryBar
-      .create(currentX, 450, item.texture.key, item.frame.name)
+      .create(currentX, 445, item.texture.key, item.frame.name)
       .setTint(0x696969)
-      .setScale(3)
+      .setScale(2)
     currentX += 48
   })
 }
