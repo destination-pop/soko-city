@@ -8,7 +8,7 @@ import SokoGoal from '../entity/SokoGoal'
 import SokoWall from '../entity/SokoWall'
 
 import firebase from 'firebase'
-import { saveLevelProgression } from '../server/db'
+import { saveLevelProgression, endGame } from '../server/db'
 
 let groundLayer
 let objectLayer
@@ -18,12 +18,10 @@ export default class WorldScene extends Phaser.Scene {
   constructor() {
     super('WorldScene')
 
-    this.transitionToNextLevel = this.transitionToNextLevel.bind(this)
     this.createSokoBoxSprite = this.createSokoBoxSprite.bind(this)
     this.createSokoGoalSprite = this.createSokoGoalSprite.bind(this)
     this.createSokoWallSprite = this.createSokoWallSprite.bind(this)
     this.randomizeWorld = this.randomizeWorld.bind(this)
-    this.transitionToNextLevel = this.transitionToNextLevel.bind(this)
   }
 
   preload() {
@@ -101,7 +99,7 @@ export default class WorldScene extends Phaser.Scene {
 
     // If 3x3 area around (4, 3) is empty, we'll spawn our player here
     // Otherwise, it will keep searching for a good spot
-    this.randomizePlayerSpawn(15, 15)
+    this.randomizePlayerSpawn(1, 1)
 
     // Setting keyboard input for movement
     this.cursors = this.input.keyboard.createCursorKeys()
@@ -111,19 +109,21 @@ export default class WorldScene extends Phaser.Scene {
       classType: NPC,
       immovable: true
     })
-    this.villagers.enableBody = true;
+    this.villagers.enableBody = true
 
-    this.randomizeNPCs(this.villagers, this.levelConfig.NPC)
-
+    //randomize NPC
+    this.randomizeNPCs(this.villagers, this.levelConfig)
 
     //creating random items for scene and updating UI with items in scene
     this.inventoryItems = this.physics.add.group({
       classType: InventoryItem
     })
 
-    this.randomizeItems(this.inventoryItems, this.levelConfig.itemsToAcquire)
+    this.randomizeItems(this.inventoryItems, this.levelConfig)
 
-
+    //hiding NPC item
+    this.hideNPCitem(this.inventoryItems, this.levelConfig)
+    
     //Making Puzzle Sprites:
     //Creating sokoban puzzle sprites' physics group:
     this.sokoBoxes = this.physics.add.group({
@@ -158,8 +158,12 @@ export default class WorldScene extends Phaser.Scene {
       this
     )
 
-      //setting all puzzle collisions
-    this.physics.add.collider(this.player, this.sokoBoxes, this.updateBoxMovement) //Player can push the puzzle boxes
+    //setting all puzzle collisions
+    this.physics.add.collider(
+      this.player,
+      this.sokoBoxes,
+      this.updateBoxMovement
+    ) //Player can push the puzzle boxes
 
     this.physics.add.collider(this.player, this.sokoWalls) //Player can't move through puzzle walls
 
@@ -199,30 +203,59 @@ export default class WorldScene extends Phaser.Scene {
     // Animating sprite motion
     this.createAnimations()
 
+    this.events.on('puzzleSolved', function(inventoryItems) {
+      inventoryItems.getChildren()[0].setVisible(true)
+      inventoryItems.getChildren()[0].enableBody()
+    })
+
     const uiScene = this.scene.get('UIScene')
 
     uiScene.events.once(
       'startTransition',
       function() {
         uiScene.inventoryBar.setVisible(false)
-        this.transitionToNextLevel(this.levelConfig.level)
-        firebase.auth().currentUser.email
-          ? saveLevelProgression(
-              firebase.auth().currentUser.email,
-              this.levelConfig.level
-            )
-          : null
+        this.transitionToNextLevel()
+
+        if (this.levelConfig.level === 5) {
+          firebase.auth().currentUser.email
+            ? endGame(firebase.auth().currentUser.email)
+            : null
+        } else {
+          firebase.auth().currentUser.email
+            ? saveLevelProgression(
+                firebase.auth().currentUser.email,
+                this.levelConfig.level
+              )
+            : null
+        }
       },
       this
     )
   }
   //end of create method
 
+  //loads the transition scene leading to the next level scene
+  transitionToNextLevel() {
+    this.cameras.main.fadeOut(500)
+    this.time.addEvent({
+      delay: 500,
+      callback: () => {
+        if (this.levelConfig.level === 5) {
+          this.events.off('update')
+          this.scene.start('EndScene')
+        } else {
+          this.levelConfig = setLevelConfig(this.levelConfig.level + 1)
+          this.events.off('update')
+          this.scene.start('TransitionScene', this.levelConfig)
+        }
+      }
+    })
+  }
 
-
-  randomizeItems(group, quantity) {
+  randomizeItems(group, levelConfig) {
     let unique = []
-    while (unique.length < quantity) {
+
+    while (unique.length < levelConfig.itemsToAcquire) {
       let x = Phaser.Math.RND.between(200, 300)
       let y = Phaser.Math.RND.between(200, 300)
       let frame = Phaser.Math.RND.between(0, 63)
@@ -236,87 +269,73 @@ export default class WorldScene extends Phaser.Scene {
     this.events.emit('newLevel')
   }
 
-  randomizeNPCs(group, quantity) {
+  randomizeNPCs(group, levelConfig) {
     let unique = []
-    while (unique.length < quantity) {
-      let x = Phaser.Math.RND.between(200, 300)
-      let y = Phaser.Math.RND.between(200, 300)
+    while (unique.length < levelConfig.NPC) {
+      let x = ((levelConfig.puzzleOptions.width - 4) * 16) +  levelConfig.puzzleOptions.x
+      let y = ((levelConfig.puzzleOptions.height + 0.5) * 16) 
+      + levelConfig.puzzleOptions.y
       let frame = Phaser.Math.RND.between(0, 8)
 
       if (unique.indexOf(frame) === -1) {
         unique.push(frame)
         let villager = new NPC(this, x, y, 'villagers', frame)
+        
         group.add(villager)
       }
     }
   }
 
-  // hideNPCfood() {
-  //   for (let i = 0; i < this.villagers.getChildren().length; i++) {
-  //     if (this.inventoryItems.getChildren()[i]) {
-  //       this.inventoryItems.getChildren()[i].disableBody(true).setVisible(true)
-  //     }
-  //   }
-  // }
+  hideNPCitem(group, levelConfig) {
+    let npcItem = group.getChildren()[0]
+    npcItem.setX(((levelConfig.puzzleOptions.width - 3) * 16) + levelConfig.puzzleOptions.x)
+    npcItem.setY(((levelConfig.puzzleOptions.height + 0.5) * 16) + levelConfig.puzzleOptions.y)
+    npcItem.disableBody(true, true)
+  }
 
-
-//Utility fxns for creating puzzle sprites
+  //Utility fxns for creating puzzle sprites
   createSokoBoxSprite(group) {
-    for (let i=0; i < this.levelConfig.puzzleOptions.height; i++) {
-      for (let j=0; j < this.levelConfig.puzzleOptions.width; j++) {
+    for (let i = 0; i < this.levelConfig.puzzleOptions.height; i++) {
+      for (let j = 0; j < this.levelConfig.puzzleOptions.width; j++) {
         if (this.levelConfig.puzzleLayers.box.data[i][j] === 28) {
-          let x = j * 16 + this.levelConfig.puzzleOptions.x; //16 = tile size
-          let y = i * 16 + this.levelConfig.puzzleOptions.y; //16 = tile size
-          let sokoBoxSprite = new SokoBox(this, x, y, 'sokoboxes');
+          let x = j * 16 + this.levelConfig.puzzleOptions.x //16 = tile size
+          let y = i * 16 + this.levelConfig.puzzleOptions.y //16 = tile size
+          let sokoBoxSprite = new SokoBox(this, x, y, 'sokoboxes')
           sokoBoxSprite.setSize(50, 50)
-          sokoBoxSprite.setScale(0.25);
-          group.add(sokoBoxSprite);
+          sokoBoxSprite.setScale(0.25)
+          group.add(sokoBoxSprite)
         }
       }
     }
   }
 
   createSokoGoalSprite(group) {
-    for (let i=0; i < this.levelConfig.puzzleOptions.height; i++) {
-      for (let j=0; j < this.levelConfig.puzzleOptions.width; j++) {
+    for (let i = 0; i < this.levelConfig.puzzleOptions.height; i++) {
+      for (let j = 0; j < this.levelConfig.puzzleOptions.width; j++) {
         if (this.levelConfig.puzzleLayers.goal.data[i][j] === 9) {
-          let x = j * 16 + this.levelConfig.puzzleOptions.x;
-          let y = i * 16 + this.levelConfig.puzzleOptions.y;
+          let x = j * 16 + this.levelConfig.puzzleOptions.x
+          let y = i * 16 + this.levelConfig.puzzleOptions.y
           let sokoGoalSprite = new SokoGoal(this, x, y, 'sokogoals')
-          sokoGoalSprite.setScale(0.25);
-          group.add(sokoGoalSprite);
+          sokoGoalSprite.setScale(0.25)
+          group.add(sokoGoalSprite)
         }
       }
     }
   }
 
   createSokoWallSprite(group) {
-    for (let i=0; i < this.levelConfig.puzzleOptions.height; i++) {
-      for (let j=0; j < this.levelConfig.puzzleOptions.width; j++) {
+    for (let i = 0; i < this.levelConfig.puzzleOptions.height; i++) {
+      for (let j = 0; j < this.levelConfig.puzzleOptions.width; j++) {
         if (this.levelConfig.puzzleLayers.wall.data[i][j] === 12) {
-          let x = j * 16 + this.levelConfig.puzzleOptions.x;
-          let y = i * 16 + this.levelConfig.puzzleOptions.y;
-          let sokoWallSprite = new SokoWall(this, x, y, 'sokowalls');
+          let x = j * 16 + this.levelConfig.puzzleOptions.x
+          let y = i * 16 + this.levelConfig.puzzleOptions.y
+          let sokoWallSprite = new SokoWall(this, x, y, 'sokowalls')
           sokoWallSprite.setSize(50, 50)
           sokoWallSprite.setScale(0.25)
           group.add(sokoWallSprite)
         }
       }
     }
-  }
-
-  //loads the transition scene leading to the next level scene
-  transitionToNextLevel(level) {
-    this.cameras.main.fadeOut(500)
-    this.time.addEvent({
-      delay: 500,
-      callback: () => {
-        //Jas's note:  is this the correct place to increment level
-        this.levelConfig = setLevelConfig(this.levelConfig.level + 1)
-        this.events.off('update')
-        this.scene.start('TransitionScene', this.levelConfig)
-      }
-    })
   }
 
   // Callback for player/inventory item overlap
@@ -335,19 +354,19 @@ export default class WorldScene extends Phaser.Scene {
     }
   }
 
-  updateBoxMovement (player, box) {
+  updateBoxMovement(player, box) {
     box.update()
   }
 
-  puzzleSolve (box, goal) {
-    goal.setTint(0xFF00FF)
+  puzzleSolve(box, goal) {
+    goal.setTint(0xff00ff)
     goal.disableBody(true, false)
 
     let allGoals = this.sokoGoals.getChildren()
     if (allGoals.every(function (goal) {
       return goal.isTinted
     })) {
-      this.events.emit('puzzleSolved')
+      this.events.emit('puzzleSolved', this.inventoryItems)
     }
   }
 
@@ -442,14 +461,13 @@ export default class WorldScene extends Phaser.Scene {
       { index: 112, weight: 2 } // Small Tree
     ])
 
-    const x = (this.levelConfig.puzzleOptions.x / 16) - 1 //Unit: tiles
-    const y = (this.levelConfig.puzzleOptions.y / 16) - 1
+    const x = this.levelConfig.puzzleOptions.x / 16 - 1 //Unit: tiles
+    const y = this.levelConfig.puzzleOptions.y / 16 - 1
     const width = this.levelConfig.puzzleOptions.width + 2 //Unit: Tiles
     const height = this.levelConfig.puzzleOptions.height + 2
 
     // Clear out a rectangle of empty space for sokoban puzzle (top left)
-    objectLayer.fill(-1, x, y, width, height); //clear out any objects for collisions
-    groundLayer.fill(22, x, y, width, height); //yellow tile for puzzlefor plain green: use 22 instead of 85
+    objectLayer.fill(-1, x, y, width, height) //clear out any objects for collisions
+    groundLayer.fill(22, x, y, width, height) //yellow tile for puzzlefor plain green: use 22 instead of 85
   }
-
 }
