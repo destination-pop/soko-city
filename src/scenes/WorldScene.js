@@ -101,8 +101,11 @@ export default class WorldScene extends Phaser.Scene {
     // Otherwise, it will keep searching for a good spot
     this.randomizePlayerSpawn(1, 1)
 
-    // Setting keyboard input for movement
-    this.cursors = this.input.keyboard.createCursorKeys()
+    this.inventoryItems = this.physics.add.group({
+      classType: InventoryItem
+    })
+
+    this.randomizeItems(this.inventoryItems, this.levelConfig.itemsToAcquire)
 
     //creating random villagers
     this.villagers = this.physics.add.group({
@@ -123,20 +126,21 @@ export default class WorldScene extends Phaser.Scene {
 
     //hiding NPC item
     this.hideNPCitem(this.inventoryItems, this.levelConfig)
-    
+
     //Making Puzzle Sprites:
     //Creating sokoban puzzle sprites' physics group:
     this.sokoBoxes = this.physics.add.group({
       classType: SokoBox
     })
 
-    this.sokoGoals = this.physics.add.group()
+    this.sokoGoals = this.physics.add.group({
+      classType: SokoGoal
+    })
 
     this.sokoWalls = this.physics.add.group({
       classType: SokoWall,
       immovable: true
     })
-    this.sokoWalls.enableBody = true
 
     //Creating sokoBoxes, sokoGoals, and sokoWalls for puzzle
     this.createSokoBoxSprite(this.sokoBoxes)
@@ -158,16 +162,15 @@ export default class WorldScene extends Phaser.Scene {
       this
     )
 
+
     //setting all puzzle collisions
     this.physics.add.collider(
       this.player,
       this.sokoBoxes,
       this.updateBoxMovement
     ) //Player can push the puzzle boxes
-
     this.physics.add.collider(this.player, this.sokoWalls) //Player can't move through puzzle walls
-
-    this.physics.add.collider(this.sokoBoxes, this.sokoWalls)
+    this.physics.add.collider(this.sokoBoxes, [this.sokoWalls, this.sokoBoxes])
     this.physics.add.collider(this.sokoBoxes, this.sokoBoxes)
 
     //adding overlap for picking up items
@@ -187,7 +190,7 @@ export default class WorldScene extends Phaser.Scene {
       null,
       this
     )
-
+    
     // Blocking off the edges
     this.player.setCollideWorldBounds(true)
     objectLayer.setCollisionByExclusion([-1])
@@ -199,6 +202,9 @@ export default class WorldScene extends Phaser.Scene {
 
     this.cameras.main.roundPixels = true
     this.cameras.main.setZoom(2)
+
+    // Setting keyboard input for movement
+    this.cursors = this.input.keyboard.createCursorKeys()
 
     // Animating sprite motion
     this.createAnimations()
@@ -273,14 +279,14 @@ export default class WorldScene extends Phaser.Scene {
     let unique = []
     while (unique.length < levelConfig.NPC) {
       let x = ((levelConfig.puzzleOptions.width - 4) * 16) +  levelConfig.puzzleOptions.x
-      let y = ((levelConfig.puzzleOptions.height + 0.5) * 16) 
+      let y = ((levelConfig.puzzleOptions.height + 0.5) * 16)
       + levelConfig.puzzleOptions.y
       let frame = Phaser.Math.RND.between(0, 8)
 
       if (unique.indexOf(frame) === -1) {
         unique.push(frame)
         let villager = new NPC(this, x, y, 'villagers', frame)
-        
+
         group.add(villager)
       }
     }
@@ -297,7 +303,7 @@ export default class WorldScene extends Phaser.Scene {
   createSokoBoxSprite(group) {
     for (let i = 0; i < this.levelConfig.puzzleOptions.height; i++) {
       for (let j = 0; j < this.levelConfig.puzzleOptions.width; j++) {
-        if (this.levelConfig.puzzleLayers.box.data[i][j] === 28) {
+        if (this.levelConfig.puzzleLayers.box.data[i][j] === 28) {=
           let x = j * 16 + this.levelConfig.puzzleOptions.x //16 = tile size
           let y = i * 16 + this.levelConfig.puzzleOptions.y //16 = tile size
           let sokoBoxSprite = new SokoBox(this, x, y, 'sokoboxes')
@@ -349,6 +355,7 @@ export default class WorldScene extends Phaser.Scene {
       this.levelConfig.itemsAcquired.length === this.levelConfig.itemsToAcquire
     ) {
       this.events.emit('levelComplete', this.levelConfig.level, item.frame.name)
+      console.log('Level Completed: ', this.levelConfig.level)
     } else {
       this.events.emit('itemFound', item.frame.name)
     }
@@ -436,7 +443,9 @@ export default class WorldScene extends Phaser.Scene {
 
     if (collisionCheck.every(e => e === -1)) {
       this.player = new Player(this, x * 16, y * 16, 'player')
-      this.player.setSize(11, 11)
+      this.player.body.width = 11
+      this.player.body.height = 11
+      this.player.body.setOffset(2.5, 1)
     } else {
       this.randomizePlayerSpawn(x + 1, y + 1)
     }

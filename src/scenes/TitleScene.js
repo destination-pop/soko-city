@@ -52,17 +52,22 @@ class TitleScene extends Phaser.Scene {
   handleClick() {
     this.cameras.main.fadeOut(500)
 
-    const startWorldScene = () => {
+    const startIntroSceneOrResumeLevel = () => {
       this.time.addEvent({
         delay: 500,
         callback: () => {
-          this.scene.start('WorldScene', levelConfig)
-          this.scene.launch('UIScene')
-          this.scene.bringToTop('UIScene')
+          if(levelConfig.level === 1){
+            this.scene.start('IntroScene', levelConfig)
+          } else {
+            this.scene.start('WorldScene', levelConfig)
+            this.scene.launch('UIScene')
+            this.scene.bringToTop('UIScene')
+          }
         }
       })
     }
-    startWorldScene()
+
+    startIntroSceneOrResumeLevel()
   }
 }
 
