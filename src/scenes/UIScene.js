@@ -18,13 +18,17 @@ export default class UIScene extends Phaser.Scene {
     this.load.image('nextPage', 'assets/UI/arrow-down-left.png');
     this.load.image('close', 'assets/UI/x.png')
     this.load.image('textBox', 'assets/UI/textbox.png')
-    
+
+    this.load.audio('mainSong', 'assets/sound/windlessSlopes.mp3')
+    this.load.audio('puzzleSong', 'assets/sound/redCarpetWoodenFloor.mp3')
   }
 
   create () {
 
     //pulling information from World Scene
     const currentGame = this.scene.get('WorldScene')
+
+    const mainGameSong = this.sound.play('mainSong')
 
     // initializing text box for quests
     const textBox = this.rexUI.add.textBox({
