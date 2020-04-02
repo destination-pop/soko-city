@@ -69,6 +69,7 @@ export default class WorldScene extends Phaser.Scene {
 
   create(data) {
     this.levelConfig = data
+    console.log('Level Config Data: ', this.levelConfig)
 
     //fade into the scene
     this.cameras.main.fadeIn(500)
@@ -122,7 +123,7 @@ export default class WorldScene extends Phaser.Scene {
 
     this.randomizeItems(this.inventoryItems, this.levelConfig.itemsToAcquire)
 
-  
+
     //Making Puzzle Sprites:
     //Creating sokoban puzzle sprites' physics group:
     this.sokoBoxes = this.physics.add.group({
@@ -164,7 +165,7 @@ export default class WorldScene extends Phaser.Scene {
 
     this.physics.add.collider(this.sokoBoxes, this.sokoWalls)
     this.physics.add.collider(this.sokoBoxes, this.sokoBoxes)
-  
+
     //adding overlap for picking up items
     this.physics.add.overlap(
       this.player,
@@ -179,7 +180,7 @@ export default class WorldScene extends Phaser.Scene {
       this.sokoBoxes,
       this.sokoGoals,
       this.puzzleSolve,
-      null, 
+      null,
       this
     )
 
