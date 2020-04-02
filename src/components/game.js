@@ -7,10 +7,12 @@ import UIScene from '../scenes/UIScene'
 import TitleScene from '../scenes/TitleScene'
 import TransitionScene from '../scenes/TransitionScene'
 import React from 'react'
+import EndScene from '../scenes/EndScene'
 
 class phaserGame extends Phaser.Game {
-  constructor() {
-    super(phaserConfig, firebaseConfig);
+  constructor(react) {
+    super(phaserConfig, firebaseConfig)
+    this.react = react
 
     //Add all the scenes
     this.scene.add('MainScene', MainScene)
@@ -18,6 +20,7 @@ class phaserGame extends Phaser.Game {
     this.scene.add('WorldScene', WorldScene)
     this.scene.add('UIScene', UIScene)
     this.scene.add('TransitionScene', TransitionScene)
+    this.scene.add('EndScene', EndScene)
 
     //Start the game with the main scene
     this.scene.start('MainScene')
@@ -25,15 +28,19 @@ class phaserGame extends Phaser.Game {
 }
 
 export default class Game extends React.Component {
-  componentDidMount() {
-    new phaserGame
+  constructor() {
+    super()
+    this.state = {
+      restart: false
+    }
   }
+  componentDidMount() {
 
-  shouldComponentUpdate() {
-    return false
   }
 
   render() {
+    this.game = new phaserGame(this)
+    console.log(this.state)
     return <div id="phaser-game" />
   }
 }

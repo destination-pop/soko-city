@@ -34,7 +34,12 @@ class TitleScene extends Phaser.Scene {
               saveLevelProgression(firebase.auth().currentUser.email, 1)
               levelConfig = setLevelConfig(1)
             } else {
-              levelConfig = setLevelConfig(doc.data().level)
+              if (doc.data().completed) {
+                saveLevelProgression(firebase.auth().currentUser.email, 1)
+                levelConfig = setLevelConfig(1)
+              } else {
+                levelConfig = setLevelConfig(doc.data().level)
+              }
             }
             console.log(levelConfig)
           })

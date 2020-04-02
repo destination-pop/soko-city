@@ -18,7 +18,6 @@ export default class WorldScene extends Phaser.Scene {
   constructor() {
     super('WorldScene')
 
-    this.transitionEnd = this.transitionEnd.bind(this)
     this.transitionToNextLevel = this.transitionToNextLevel.bind(this)
     this.createSokoBoxSprite = this.createSokoBoxSprite.bind(this)
     this.createSokoGoalSprite = this.createSokoGoalSprite.bind(this)
@@ -206,46 +205,40 @@ export default class WorldScene extends Phaser.Scene {
       'startTransition',
       function() {
         uiScene.inventoryBar.setVisible(false)
-        this.transitionToNextLevel(this.levelConfig.level)
-        firebase.auth().currentUser.email
-          ? saveLevelProgression(
-              firebase.auth().currentUser.email,
-              this.levelConfig.level
-            )
-          : null
+        this.transitionToNextLevel()
+
+        if (this.levelConfig.level === 5) {
+          firebase.auth().currentUser.email
+            ? endGame(firebase.auth().currentUser.email)
+            : null
+        } else {
+          firebase.auth().currentUser.email
+            ? saveLevelProgression(
+                firebase.auth().currentUser.email,
+                this.levelConfig.level
+              )
+            : null
+        }
       },
       this
     )
-
-    uiScene.events.on('gameComplete', function() {
-      uiScene.inventoryBar.setVisible(false)
-      this.transitionEnd()
-      firebase.auth().currentUser.email
-        ? endGame(firebase.auth().currentUser.email)
-        : null
-    })
   }
   //end of create method
 
-  transitionEnd() {
-    this.cameras.main.fadeOut(500)
-    this.time.addEvent({
-      delay: 500,
-      callback: () => {
-        this.events.off('update')
-        this.scene.start('EndScene')
-      }
-    })
-  }
   //loads the transition scene leading to the next level scene
   transitionToNextLevel() {
     this.cameras.main.fadeOut(500)
     this.time.addEvent({
       delay: 500,
       callback: () => {
-        this.levelConfig = setLevelConfig(this.levelConfig.level + 1)
-        this.events.off('update')
-        this.scene.start('TransitionScene', this.levelConfig)
+        if (this.levelConfig.level === 5) {
+          this.events.off('update')
+          this.scene.start('EndScene')
+        } else {
+          this.levelConfig = setLevelConfig(this.levelConfig.level + 1)
+          this.events.off('update')
+          this.scene.start('TransitionScene', this.levelConfig)
+        }
       }
     })
   }

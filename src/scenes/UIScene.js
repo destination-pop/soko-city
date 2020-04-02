@@ -69,9 +69,7 @@ export default class UIScene extends Phaser.Scene {
           this.isLastPage
         ) {
           textBox.setVisible(false)
-          currentGame.levelConfig.level === 3
-            ? this.scene.events.emit('gameComplete')
-            : this.scene.events.emit('startTransition')
+          this.scene.events.emit('startTransition')
         } else if (this.isLastPage) {
           textBox.setVisible(false)
         } else {
