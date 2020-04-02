@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import NavBar from './navBar'
 import Game from './game'
+import GameInstructions from './instructionOnSide'
 
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth'
 import firebase from 'firebase'
@@ -55,7 +56,11 @@ class MainContent extends Component {
             firebaseAuth={firebase.auth()}
           />
         ) : (
-          <Game />
+          <div> 
+            <Game />
+            <GameInstructions />
+          </div>
+
         )}
       </div>
     )

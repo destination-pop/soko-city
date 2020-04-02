@@ -26,18 +26,25 @@ function createGeneratorConfig(options) {
   }
 }
 
+//Create function to check if puzzle is already partially solved
+let puzzleContainsSolvedTiles = puzzleData => {
+  return puzzleData.reduce((acc, el) => {
+    return acc || el.includes('*')
+  }, false)
+}
+
+// Generate a puzzle that is not null and has no solved tiles
 function generatePuzzle(config) {
   let puzzle = sokobanGenerator.generateSokobanLevel(createGeneratorConfig(config))
-  
-  //Create function to check if puzzle is already partially solved
-  let puzzleContainsSolvedTiles = puzzleData => {
-    return puzzleData.reduce((acc, el) => {
-      return acc || el.includes('*')
-    }, false)
+
+
+  while (puzzle === null) {
+    //if puzzle times out, regenerate
+    puzzle = sokobanGenerator.generateSokobanLevel(createGeneratorConfig(config))
   }
 
-  while (puzzle === null || puzzleContainsSolvedTiles(puzzle._data._data)) {
-    //if puzzle times out or is already solved, regenerate
+  while(puzzleContainsSolvedTiles(puzzle._data._data)) {
+    //if puzzle contains solved tiles, regenerate
     puzzle = sokobanGenerator.generateSokobanLevel(createGeneratorConfig(config))
   }
 
@@ -45,6 +52,5 @@ function generatePuzzle(config) {
 }
 
 export {
-  createGeneratorConfig,
   generatePuzzle
 }

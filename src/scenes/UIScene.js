@@ -7,13 +7,14 @@ export default class UIScene extends Phaser.Scene {
     //load background image for inventory bar
     this.load.image('graySquare', 'assets/sprites/graySquare.png')
 
-    //load plugin and images for text box
+    // load plugin and images for text box
     this.load.scenePlugin({
       key: 'rexuiplugin',
       url:
         'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js',
       sceneKey: 'rexUI'
     })
+
 
     this.load.image('nextPage', 'assets/UI/arrow-down-left.png')
     this.load.image('close', 'assets/UI/x.png')
@@ -29,7 +30,7 @@ export default class UIScene extends Phaser.Scene {
     const currentGame = this.scene.get('WorldScene')
 
     //adding music to scene
-    const mainGameSong = this.sound.add('mainSong')
+    const mainSong = this.sound.add('mainSong')
     const puzzleSong = this.sound.add('puzzleSong')
 
     const resetButton = this.add.image(600, 20, 'reset').setScale(.17)
@@ -116,7 +117,7 @@ export default class UIScene extends Phaser.Scene {
     )
 
     //starting music
-    mainGameSong.play()
+    mainSong.play()
 
     
     //launching text box for initial quest and populating inventory bar
@@ -131,9 +132,9 @@ export default class UIScene extends Phaser.Scene {
           foodNames
         )
         textBox.setVisible(true).start(levelIntro(), 50)
-        mainGameSong.stop()
+        mainSong.stop()
         puzzleSong.stop()
-        mainGameSong.play()
+        mainSong.play()
       },
       this
     )
@@ -144,7 +145,7 @@ export default class UIScene extends Phaser.Scene {
     }, this)
 
     currentGame.events.once('villagerEncounter', function() {
-      mainGameSong.stop()
+      mainSong.stop()
       puzzleSong.play()
     })
 
@@ -170,7 +171,7 @@ export default class UIScene extends Phaser.Scene {
       textBox.setVisible(true).start(puzzleSolvedDialog, 50)
 
       puzzleSong.stop()
-      mainGameSong.play()
+      mainSong.play()
     })
 
     // this.events.on('startTransition', function() {
