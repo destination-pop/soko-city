@@ -99,13 +99,13 @@ export default class WorldScene extends Phaser.Scene {
 
     // If 3x3 area around (4, 3) is empty, we'll spawn our player here
     // Otherwise, it will keep searching for a good spot
-    this.randomizePlayerSpawn(1, 1)
+    this.randomizePlayerSpawn(2, 2)
 
     this.inventoryItems = this.physics.add.group({
       classType: InventoryItem
     })
 
-    this.randomizeItems(this.inventoryItems, this.levelConfig.itemsToAcquire)
+    // this.randomizeItems(this.inventoryItems, this.levelConfig.itemsToAcquire)
 
     //creating random villagers
     this.villagers = this.physics.add.group({
@@ -161,7 +161,6 @@ export default class WorldScene extends Phaser.Scene {
       null,
       this
     )
-
 
     //setting all puzzle collisions
     this.physics.add.collider(
@@ -264,14 +263,27 @@ export default class WorldScene extends Phaser.Scene {
     let unique = []
 
     while (unique.length < levelConfig.itemsToAcquire) {
-      let x = Phaser.Math.RND.between(200, 300)
-      let y = Phaser.Math.RND.between(200, 300)
+      let x = Math.floor(
+        Phaser.Math.RND.between(5, this.levelConfig.mapWidth - 5)
+      )
+      let y = Math.floor(
+        Phaser.Math.RND.between(5, this.levelConfig.mapHeight - 5)
+      )
       let frame = Phaser.Math.RND.between(0, 63)
 
-      if (unique.indexOf(frame) === -1) {
-        unique.push(frame)
-        let item = new InventoryItem(this, x, y, 'food', frame)
-        group.add(item)
+      console.log(x, y)
+      console.log(this.levelConfig.mapWidth)
+      console.log(this.levelConfig.mapHeight)
+
+      // if (collisionCheck.every(e => e === -1)) {
+      console.log(map.getTileAt(x, y, true, 'Object Layer'))
+      if (map.getTileAt(x, y, true, 'Object Layer').index === -1) {
+        if (unique.indexOf(frame) === -1) {
+          unique.push(frame)
+          let item = new InventoryItem(this, x * 16, y * 16, 'food', frame)
+          group.add(item)
+        }
+        // let item = new InventoryItem(this, x, y, 'food', frame)
       }
     }
     this.events.emit('newLevel')
@@ -280,9 +292,11 @@ export default class WorldScene extends Phaser.Scene {
   randomizeNPCs(group, levelConfig) {
     let unique = []
     while (unique.length < levelConfig.NPC) {
-      let x = ((levelConfig.puzzleOptions.width - 4) * 16) +  levelConfig.puzzleOptions.x
-      let y = ((levelConfig.puzzleOptions.height + 0.5) * 16)
-      + levelConfig.puzzleOptions.y
+      let x =
+        (levelConfig.puzzleOptions.width - 4) * 16 + levelConfig.puzzleOptions.x
+      let y =
+        (levelConfig.puzzleOptions.height + 0.5) * 16 +
+        levelConfig.puzzleOptions.y
       let frame = Phaser.Math.RND.between(0, 8)
 
       if (unique.indexOf(frame) === -1) {
@@ -296,8 +310,13 @@ export default class WorldScene extends Phaser.Scene {
 
   hideNPCitem(group, levelConfig) {
     let npcItem = group.getChildren()[0]
-    npcItem.setX(((levelConfig.puzzleOptions.width - 3) * 16) + levelConfig.puzzleOptions.x)
-    npcItem.setY(((levelConfig.puzzleOptions.height + 0.5) * 16) + levelConfig.puzzleOptions.y)
+    npcItem.setX(
+      (levelConfig.puzzleOptions.width - 3) * 16 + levelConfig.puzzleOptions.x
+    )
+    npcItem.setY(
+      (levelConfig.puzzleOptions.height + 0.5) * 16 +
+        levelConfig.puzzleOptions.y
+    )
     npcItem.disableBody(true, true)
   }
 
@@ -372,9 +391,11 @@ export default class WorldScene extends Phaser.Scene {
     goal.disableBody(true, false)
 
     let allGoals = this.sokoGoals.getChildren()
-    if (allGoals.every(function (goal) {
-      return goal.isTinted
-    })) {
+    if (
+      allGoals.every(function(goal) {
+        return goal.isTinted
+      })
+    ) {
       this.events.emit('puzzleSolved', this.inventoryItems)
     }
   }
