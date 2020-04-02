@@ -303,7 +303,7 @@ export default class WorldScene extends Phaser.Scene {
   createSokoBoxSprite(group) {
     for (let i = 0; i < this.levelConfig.puzzleOptions.height; i++) {
       for (let j = 0; j < this.levelConfig.puzzleOptions.width; j++) {
-        if (this.levelConfig.puzzleLayers.box.data[i][j] === 28) {=
+        if (this.levelConfig.puzzleLayers.box.data[i][j] === 28) {
           let x = j * 16 + this.levelConfig.puzzleOptions.x //16 = tile size
           let y = i * 16 + this.levelConfig.puzzleOptions.y //16 = tile size
           let sokoBoxSprite = new SokoBox(this, x, y, 'sokoboxes')
