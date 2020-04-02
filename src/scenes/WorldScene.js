@@ -190,7 +190,7 @@ export default class WorldScene extends Phaser.Scene {
       null,
       this
     )
-    
+
     // Blocking off the edges
     this.player.setCollideWorldBounds(true)
     objectLayer.setCollisionByExclusion([-1])
