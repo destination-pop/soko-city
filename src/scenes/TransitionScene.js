@@ -20,7 +20,7 @@ class TransitionScene extends Phaser.Scene {
       delay: 3500,
       callback: () => {
         this.scene.start('WorldScene', this.levelConfig);
-        this.scene.bringToTop('UIScene')      
+        this.scene.bringToTop('UIScene')
       }
     })
   }

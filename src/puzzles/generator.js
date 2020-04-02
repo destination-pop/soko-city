@@ -27,7 +27,21 @@ function createGeneratorConfig(options) {
 }
 
 function generatePuzzle(config) {
-  return sokobanGenerator.generateSokobanLevel(createGeneratorConfig(config))
+  let puzzle = sokobanGenerator.generateSokobanLevel(createGeneratorConfig(config))
+  
+  //Create function to check if puzzle is already partially solved
+  let puzzleContainsSolvedTiles = puzzleData => {
+    return puzzleData.reduce((acc, el) => {
+      return acc || el.includes('*')
+    }, false)
+  }
+
+  while (puzzle === null || puzzleContainsSolvedTiles(puzzle._data._data)) {
+    //if puzzle times out or is already solved, regenerate
+    puzzle = sokobanGenerator.generateSokobanLevel(createGeneratorConfig(config))
+  }
+
+  return puzzle
 }
 
 export {
