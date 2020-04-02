@@ -1,7 +1,6 @@
 export default class UIScene extends Phaser.Scene {
-
-  constructor (){
-    super('UIScene');
+  constructor() {
+    super('UIScene')
   }
 
   preload() {
@@ -11,20 +10,19 @@ export default class UIScene extends Phaser.Scene {
     //load plugin and images for text box
     this.load.scenePlugin({
       key: 'rexuiplugin',
-      url: 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js',
+      url:
+        'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js',
       sceneKey: 'rexUI'
-    });
+    })
 
-    this.load.image('nextPage', 'assets/UI/arrow-down-left.png');
+    this.load.image('nextPage', 'assets/UI/arrow-down-left.png')
     this.load.image('close', 'assets/UI/x.png')
     this.load.image('textBox', 'assets/UI/textbox.png')
-
     this.load.audio('mainSong', 'assets/sound/windlessSlopes.mp3')
     this.load.audio('puzzleSong', 'assets/sound/redCarpetWoodenFloor.mp3')
   }
 
-  create () {
-
+  create() {
     //pulling information from World Scene
     const currentGame = this.scene.get('WorldScene')
 
@@ -34,63 +32,91 @@ export default class UIScene extends Phaser.Scene {
     const textBox = this.rexUI.add.textBox({
       x: 100,
       y: 350,
-  
+
       background: this.add.image(100, 350, 'textBox'),
-  
+
       text: getBBcodeText(this, 400, 400, 65).setTint(0x260e04),
-  
-      action: this.add.image(0, 0, 'nextPage').setTint(0x7b5e57).setVisible(false).setScale(0.5),
-  
+
+      action: this.add
+        .image(0, 0, 'nextPage')
+        .setTint(0x7b5e57)
+        .setVisible(false)
+        .setScale(0.5),
+
       space: {
         left: 20,
         right: 20,
         top: 20,
         bottom: 20,
         icon: 2,
-        text: 10,
+        text: 10
       }
     })
 
     textBox.setDepth(1)
     textBox.setVisible(false)
     textBox.setOrigin(0)
-    textBox.layout();
+    textBox.layout()
     textBox.setInteractive()
-    
-    this.input.keyboard.on('keydown-' + 'ENTER', function () {
-        const icon = textBox.getElement('action').setVisible(false);
-        textBox.resetChildVisibleState(icon);
+
+    this.input.keyboard.on(
+      'keydown-' + 'ENTER',
+      function() {
+        const icon = textBox.getElement('action').setVisible(false)
+        textBox.resetChildVisibleState(icon)
         if (this.isTyping) {
-            this.stop(true);
-        } else if (currentGame.levelConfig.itemsAcquired.length === currentGame.levelConfig.itemsToAcquire && this.isLastPage) {
+          this.stop(true)
+        } else if (
+          currentGame.levelConfig.itemsAcquired.length ===
+            currentGame.levelConfig.itemsToAcquire &&
+          this.isLastPage
+        ) {
           textBox.setVisible(false)
           this.scene.events.emit('startTransition')
         } else if (this.isLastPage) {
           textBox.setVisible(false)
         } else {
-          this.typeNextPage();
+          this.typeNextPage()
         }
-      }, textBox)
+      },
+      textBox
+    )
 
-    textBox
-    .on('pageend', function () {
-
-      const icon = textBox.getElement('action').setVisible(true);
-      textBox.resetChildVisibleState(icon);
-    }, textBox)
+    textBox.on(
+      'pageend',
+      function() {
+        const icon = textBox.getElement('action').setVisible(true)
+        textBox.resetChildVisibleState(icon)
+      },
+      textBox
+    )
 
     //initializing inventory bar
     this.inventoryBar = this.add.group()
 
-    setTimeout(populateInventoryBar(this, currentGame.inventoryItems.children.entries, foodNames), 10000)
+    setTimeout(
+      populateInventoryBar(
+        this,
+        currentGame.inventoryItems.children.entries,
+        foodNames
+      ),
+      10000
+    )
 
     //launching text box for initial quest and populating inventory bar
-    currentGame.events.on('newLevel', function () {
-      this.inventoryBar.setVisible(true)
-      populateInventoryBar(this, currentGame.inventoryItems.children.entries, foodNames)
-      textBox.setVisible(true).start(levelIntro(), 50)
-    }, this)
-
+    currentGame.events.on(
+      'newLevel',
+      function() {
+        this.inventoryBar.setVisible(true)
+        populateInventoryBar(
+          this,
+          currentGame.inventoryItems.children.entries,
+          foodNames
+        )
+        textBox.setVisible(true).start(levelIntro(), 50)
+      },
+      this
+    )
 
     //launching text box on villager encounter
     currentGame.events.once('villagerEncounter', function(villager) {
@@ -102,46 +128,69 @@ export default class UIScene extends Phaser.Scene {
     }, this)
 
 
-    //launching itemFoundDialog
-    currentGame.events.on('itemFound', function(item) {
-      this.inventoryBar.children.entries.forEach(el => {
-        if (item === el.frame.name) {
-          el.clearTint()
-          textBox.setVisible(true).start(itemFoundDialog(currentGame, el.frame.name,foodNames), 50)
-        }
-      })
-    }, this)
 
-    currentGame.events.on('puzzleSolved', function () {
+    //launching itemFoundDialog
+    currentGame.events.on(
+      'itemFound',
+      function(item) {
+        this.inventoryBar.children.entries.forEach(el => {
+          if (item === el.frame.name) {
+            el.clearTint()
+            textBox
+              .setVisible(true)
+              .start(itemFoundDialog(currentGame, el.frame.name, foodNames), 50)
+          }
+        })
+      },
+      this
+    )
+
+    currentGame.events.on('puzzleSolved', function() {
       textBox.setVisible(true).start(puzzleSolvedDialog, 50)
     })
 
     //launching text box on level complete
-    currentGame.events.on('levelComplete', function(level, item) {
-      this.inventoryBar.children.entries.forEach(el => {
-        if (item === el.frame.name) {
-          el.clearTint()
-          textBox.setVisible(true).start(levelCompleteDialog(currentGame, item, level, foodNames, levelNums), 50)
-        }
-      })
-    }, this)
+    currentGame.events.on(
+      'levelComplete',
+      function(level, item) {
+        this.inventoryBar.children.entries.forEach(el => {
+          if (item === el.frame.name) {
+            el.clearTint()
+            textBox
+              .setVisible(true)
+              .start(
+                levelCompleteDialog(
+                  currentGame,
+                  item,
+                  level,
+                  foodNames,
+                  levelNums
+                ),
+                50
+              )
+          }
+        })
+      },
+      this
+    )
   }
-  
 }
-
 
 //to populate inventory bar from world scene info
 const populateInventoryBar = (scene, itemArr) => {
   let currentX = 48
   itemArr.forEach(item => {
-    scene.inventoryBar.create(currentX, 450,'graySquare').setScale(3)
-    scene.inventoryBar.create(currentX, 450, item.texture.key, item.frame.name).setTint(0x696969).setScale(3)
+    scene.inventoryBar.create(currentX, 450, 'graySquare').setScale(3)
+    scene.inventoryBar
+      .create(currentX, 450, item.texture.key, item.frame.name)
+      .setTint(0x696969)
+      .setScale(3)
     currentX += 48
   })
 }
 
 //to create text for text box
-const getBBcodeText = function (scene, wrapWidth, fixedWidth, fixedHeight) {
+const getBBcodeText = function(scene, wrapWidth, fixedWidth, fixedHeight) {
   return scene.rexUI.add.BBCodeText(0, 0, '', {
     fixedWidth: fixedWidth,
     fixedHeight: fixedHeight,
@@ -236,7 +285,8 @@ const levelIntro = () => {
 
 const initialVillagerDialog = (scene, villager, foodNames) => {
   let villagerNum = scene.villagers.children.entries.indexOf(villager)
-  let inventoryNum = scene.inventoryItems.children.entries[villagerNum].frame.name
+  let inventoryNum =
+    scene.inventoryItems.children.entries[villagerNum].frame.name
 
   return `Ah, you're the stranger looking for their pet chicken?  I'm afraid I can't do anything until I solve this mysterious puzzle in my yard!  Could you help me solve it??  I would gladly repay you with a ${foodNames[inventoryNum]}!`
 }
