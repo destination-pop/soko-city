@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import NavBar from './navBar'
 import Game from './game'
-import Instructions from './instructionOnSide'
+import GameInstructions from './instructionOnSide'
 
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth'
 import firebase from 'firebase'

@@ -1,6 +1,6 @@
 import React from 'react'
 
-const instructions = () => {
+const gameInstructions = () => {
     const instructionsStyle = {
         position: "absolute",
         top: "24px",
@@ -23,4 +23,4 @@ const instructions = () => {
 
 }
 
-export default instructions
+export default gameInstructions
