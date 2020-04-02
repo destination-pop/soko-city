@@ -30,14 +30,18 @@ class phaserGame extends Phaser.Game {
 }
 
 export default class Game extends React.Component {
-  constructor() {
+  constructor(props) {
     super()
     this.state = {
       restart: false
     }
   }
   componentDidMount() {
+    // this.game = new phaserGame(this)
+  }
 
+  componentWillUnmount() {
+    this.game.destroy(true, false)
   }
 
   render() {
