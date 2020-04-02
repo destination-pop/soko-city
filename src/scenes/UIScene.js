@@ -19,7 +19,7 @@ export default class UIScene extends Phaser.Scene {
     this.load.image('nextPage', 'assets/UI/arrow-down-left.png')
     this.load.image('close', 'assets/UI/x.png')
     this.load.image('textBox', 'assets/UI/textbox.png')
-    this.load.image('reset', 'assets/sprites/reset.png')
+    this.load.image('reset', 'assets/UI/reset.png')
 
     this.load.audio('mainSong', 'assets/sound/windlessSlopes.mp3')
     this.load.audio('puzzleSong', 'assets/sound/redCarpetWoodenFloor.mp3')
@@ -210,12 +210,12 @@ export default class UIScene extends Phaser.Scene {
           el.clearTint()
           textBox
             .setVisible(true)
-            .start(maybeLola(currentGame, el.frame.name, foodNames), 50)
+            .start(maybeLolaDialog, 50)
         }
       })
     }, this)
 
-    currentGames.events.on('levelCompleteLola', function () {
+    currentGame.events.on('levelCompleteLola', function () {
       textBox
         .setVisible(true)
         .start(levelCompleteLolaDialog, 50)
