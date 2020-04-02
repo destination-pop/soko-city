@@ -224,7 +224,7 @@ export default class WorldScene extends Phaser.Scene {
         uiScene.inventoryBar.setVisible(false)
         this.transitionToNextLevel()
 
-        if (this.levelConfig.level === 1) {
+        if (this.levelConfig.level === 5) {
           firebase.auth().currentUser.email
             ? endGame(firebase.auth().currentUser.email)
             : null
@@ -248,7 +248,7 @@ export default class WorldScene extends Phaser.Scene {
     this.time.addEvent({
       delay: 500,
       callback: () => {
-        if (this.levelConfig.level === 1) {
+        if (this.levelConfig.level === 5) {
           this.events.off('update')
           this.scene.start('EndScene')
         } else {
