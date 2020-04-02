@@ -58,7 +58,7 @@ class MainContent extends Component {
         ) : (
           <div> 
             <Game />
-            <Instructions />
+            <GameInstructions />
           </div>
 
         )}
