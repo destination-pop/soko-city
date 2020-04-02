@@ -18,7 +18,6 @@ export default class WorldScene extends Phaser.Scene {
   constructor() {
     super('WorldScene')
 
-    this.transitionToNextLevel = this.transitionToNextLevel.bind(this)
     this.createSokoBoxSprite = this.createSokoBoxSprite.bind(this)
     this.createSokoGoalSprite = this.createSokoGoalSprite.bind(this)
     this.createSokoWallSprite = this.createSokoWallSprite.bind(this)
@@ -98,7 +97,9 @@ export default class WorldScene extends Phaser.Scene {
 
     this.randomizeWorld() // Initial map randomization
 
-    //creating random items for scene and updating UI with items in scene
+    // If 3x3 area around (4, 3) is empty, we'll spawn our player here
+    // Otherwise, it will keep searching for a good spot
+    this.randomizePlayerSpawn(1, 1)
 
     this.inventoryItems = this.physics.add.group({
       classType: InventoryItem
@@ -113,11 +114,21 @@ export default class WorldScene extends Phaser.Scene {
     })
     this.villagers.enableBody = true
 
-    this.randomizeNPCs(this.villagers, this.levelConfig.NPC)
+    //randomize NPC
+    this.randomizeNPCs(this.villagers, this.levelConfig)
 
-    // If 3x3 area around (4, 3) is empty, we'll spawn our player here
-    // Otherwise, it will keep searching for a good spot
-    this.randomizePlayerSpawn(15, 15)
+
+    //creating random items for scene and updating UI with items in scene
+    this.inventoryItems = this.physics.add.group({
+      classType: InventoryItem
+    })
+
+    this.randomizeItems(this.inventoryItems, this.levelConfig)
+
+    //hiding NPC item
+    this.hideNPCitem(this.inventoryItems, this.levelConfig)
+
+
 
     //Making Puzzle Sprites:
     //Creating sokoban puzzle sprites' physics group:
@@ -185,6 +196,11 @@ export default class WorldScene extends Phaser.Scene {
     // Animating sprite motion
     this.createAnimations()
 
+    this.events.on('puzzleSolved', function(inventoryItems) {
+      inventoryItems.getChildren()[0].setVisible(true)
+      inventoryItems.getChildren()[0].enableBody()
+    })
+
     const uiScene = this.scene.get('UIScene')
 
     uiScene.events.once(
@@ -206,9 +222,10 @@ export default class WorldScene extends Phaser.Scene {
 
 
 
-  randomizeItems(group, quantity) {
+  randomizeItems(group, levelConfig) {
     let unique = []
-    while (unique.length < quantity) {
+
+    while (unique.length < levelConfig.itemsToAcquire) {
       let x = Phaser.Math.RND.between(200, 300)
       let y = Phaser.Math.RND.between(200, 300)
       let frame = Phaser.Math.RND.between(0, 63)
@@ -222,22 +239,32 @@ export default class WorldScene extends Phaser.Scene {
     this.events.emit('newLevel')
   }
 
-  randomizeNPCs(group, quantity) {
+  randomizeNPCs(group, levelConfig) {
     let unique = []
-    while (unique.length < quantity) {
-      let x = Phaser.Math.RND.between(200, 300)
-      let y = Phaser.Math.RND.between(200, 300)
+    while (unique.length < levelConfig.NPC) {
+      let x = ((levelConfig.puzzleOptions.width - 4) * 16) +  levelConfig.puzzleOptions.x
+      let y = ((levelConfig.puzzleOptions.height + 0.5) * 16)
+      + levelConfig.puzzleOptions.y
       let frame = Phaser.Math.RND.between(0, 8)
 
       if (unique.indexOf(frame) === -1) {
         unique.push(frame)
         let villager = new NPC(this, x, y, 'villagers', frame)
+
         group.add(villager)
       }
     }
   }
 
-  //Utility fxns for creating puzzle sprites
+  hideNPCitem(group, levelConfig) {
+    let npcItem = group.getChildren()[0]
+    npcItem.setX(((levelConfig.puzzleOptions.width - 3) * 16) + levelConfig.puzzleOptions.x)
+    npcItem.setY(((levelConfig.puzzleOptions.height + 0.5) * 16) + levelConfig.puzzleOptions.y)
+    npcItem.disableBody(true, true)
+  }
+
+
+//Utility fxns for creating puzzle sprites
   createSokoBoxSprite(group) {
     for (let i=0; i < this.levelConfig.puzzleOptions.height; i++) {
       for (let j=0; j < this.levelConfig.puzzleOptions.width; j++) {
@@ -314,10 +341,20 @@ export default class WorldScene extends Phaser.Scene {
       this.events.emit('itemFound', item.frame.name)
     }
 
-    // launch itemAcquiredDialog on puzzle solve
-    // else {
-    //   this.events.emit('itemFromVillager', item.frame.name)
-    // }
+  updateBoxMovement (player, box) {
+    box.update()
+  }
+
+  puzzleSolve (box, goal) {
+    goal.setTint(0xFF00FF)
+    goal.disableBody(true, false)
+
+    let allGoals = this.sokoGoals.getChildren()
+    if (allGoals.every(function (goal) {
+      return goal.isTinted
+    })) {
+      this.events.emit('puzzleSolved', this.inventoryItems)
+    }
   }
 
   //callback for player/NPC overlap
