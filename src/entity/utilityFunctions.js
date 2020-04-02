@@ -1,4 +1,4 @@
-import { createGeneratorConfig, generatePuzzle } from '../puzzles/generator'
+import { generatePuzzle } from '../puzzles/generator'
 import { convertToMapLayers } from '../puzzles/converter'
 
 //Sets levelConfig variables for a scene to load user's current level
@@ -21,7 +21,7 @@ function setLevelConfig(level) {
   }
 
   //Create map layers for the puzzle sprites
-  let rawPuzzle = generatePuzzle(createGeneratorConfig(options))
+  let rawPuzzle = generatePuzzle(options)
   let layers = convertToMapLayers(rawPuzzle)
 
   //Set config for the level and return to WorldScene
