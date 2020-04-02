@@ -69,6 +69,7 @@ export default class WorldScene extends Phaser.Scene {
   create(data) {
     this.levelConfig = data
 
+
     //fade into the scene
     this.cameras.main.fadeIn(500)
 
@@ -149,6 +150,7 @@ export default class WorldScene extends Phaser.Scene {
     // Setting our world bounds
     this.physics.world.bounds.width = map.widthInPixels
     this.physics.world.bounds.height = map.heightInPixels
+    
 
     // Setting collision rules for player
     this.physics.add.collider(this.player, objectLayer) //Blocks off trees
@@ -163,6 +165,7 @@ export default class WorldScene extends Phaser.Scene {
 
       //setting all puzzle collisions
     this.physics.add.collider(this.player, this.sokoBoxes, this.updateBoxMovement) //Player can push the puzzle boxes
+    console.log()
 
     this.physics.add.collider(this.player, this.sokoWalls) //Player can't move through puzzle walls
 
@@ -183,7 +186,7 @@ export default class WorldScene extends Phaser.Scene {
       this.sokoBoxes,
       this.sokoGoals,
       this.puzzleSolve,
-      null, 
+      null,
       this
     )
 
@@ -212,7 +215,6 @@ export default class WorldScene extends Phaser.Scene {
     uiScene.events.once(
       'startTransition',
       function() {
-        uiScene.inventoryBar.setVisible(false)
         this.transitionToNextLevel(this.levelConfig.level)
         firebase.auth().currentUser.email
           ? saveLevelProgression(
@@ -223,12 +225,20 @@ export default class WorldScene extends Phaser.Scene {
       },
       this
     )
+
+    uiScene.events.once(
+      'resetLevel', function (level) {
+        level.events.off('update')
+        level.levelConfig.itemsAcquired = []
+        level.scene.restart()
+      }
+    )
   }
   //end of create method
 
 
 
-  randomizeItems(group, levelConfig) {
+  randomizeItems(group, levelConfig, foodNames) {
     let unique = []
 
     while (unique.length < levelConfig.itemsToAcquire) {
@@ -316,7 +326,8 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   //loads the transition scene leading to the next level scene
-  transitionToNextLevel(level) {
+  transitionToNextLevel( level) {
+    this.scene.sendToBack('UIScene')
     this.cameras.main.fadeOut(500)
     this.time.addEvent({
       delay: 500,
@@ -343,11 +354,12 @@ export default class WorldScene extends Phaser.Scene {
     } else {
       this.events.emit('itemFound', item.frame.name)
     }
-  }
+  } 
 
   updateBoxMovement (player, box) {
     box.update()
   }
+
 
   puzzleSolve (box, goal) {
     goal.setTint(0xFF00FF)

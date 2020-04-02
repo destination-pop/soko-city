@@ -2,6 +2,7 @@ import 'phaser'
 import firebase from 'firebase'
 import { db } from '../config/firebaseConfig'
 import { setLevelConfig } from '../entity/utilityFunctions'
+import { saveLevelProgression } from '../server/db'
 
 let levelConfig = {}
 
@@ -29,8 +30,12 @@ class TitleScene extends Phaser.Scene {
           .doc(firebase.auth().currentUser.email)
           .get()
           .then(doc => {
-            levelConfig = setLevelConfig(doc.data().level)
-            console.log(doc.data().level)
+            if (!doc.exists) {
+              saveLevelProgression(firebase.auth().currentUser.email, 1)
+              levelConfig = setLevelConfig(1)
+            } else {
+              levelConfig = setLevelConfig(doc.data().level)
+            }
             console.log(levelConfig)
           })
           .catch(function(error) {
