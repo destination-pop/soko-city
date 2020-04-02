@@ -67,6 +67,7 @@ export default class WorldScene extends Phaser.Scene {
 
   create(data) {
     this.levelConfig = data
+    console.log('Level Config Data: ', this.levelConfig)
 
     //fade into the scene
     this.cameras.main.fadeIn(500)
@@ -123,7 +124,6 @@ export default class WorldScene extends Phaser.Scene {
     //hiding NPC item
     this.hideNPCitem(this.inventoryItems, this.levelConfig)
     
-
     //Making Puzzle Sprites:
     //Creating sokoban puzzle sprites' physics group:
     this.sokoBoxes = this.physics.add.group({
