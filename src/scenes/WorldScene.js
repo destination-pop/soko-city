@@ -362,11 +362,14 @@ export default class WorldScene extends Phaser.Scene {
 
     this.levelConfig.itemsAcquired.push(item)
 
-    if (
-      this.levelConfig.itemsAcquired.length === this.levelConfig.itemsToAcquire
-    ) {
+    if (this.levelConfig.itemsAcquired.length === this.levelConfig.itemsToAcquire) {
       this.events.emit('levelComplete', this.levelConfig.level, item.frame.name)
-    } else {
+    } else if (item.frame.name === 25) {
+      this.events.emit('maybeLola', item.frame.name)
+    } else if ((item.frame.name === 25) && (this.levelConfig.itemsAcquired.length === this.levelConfig.itemsToAcquire)) {
+      this.events.emit('levelCompleteLola')
+    }
+      else {
       this.events.emit('itemFound', item.frame.name)
     }
   } 

@@ -203,6 +203,23 @@ export default class UIScene extends Phaser.Scene {
       },
       this
     )
+
+    currentGame.events.on('maybeLola', function (item) {
+      this.inventoryBar.children.entries.forEach(el => {
+        if (item === el.frame.name) {
+          el.clearTint()
+          textBox
+            .setVisible(true)
+            .start(maybeLola(currentGame, el.frame.name, foodNames), 50)
+        }
+      })
+    }, this)
+
+    currentGames.events.on('levelCompleteLola', function () {
+      textBox
+        .setVisible(true)
+        .start(levelCompleteLolaDialog, 50)
+    }, this)
   }
 }
 
@@ -322,6 +339,10 @@ const initialVillagerDialog = (scene, villager, foodNames) => {
 }
 
 const puzzleSolvedDialog = `You've solved it!  Go to the villager to collect your reward.`
+
+const maybeLolaDialog = `You found a chicken!  Lola???  No, it's a turkey.`
+
+const levelCompleteLolaDialog = `A turkey! It's not Lola, but you've collected all the items needed!  Time to continue your journey to the next village!!!`
 
 const itemFoundDialog = (scene, foodItem, foodNames) => {
   return `You found a ${foodNames[foodItem]}!`
