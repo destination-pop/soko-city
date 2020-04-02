@@ -208,8 +208,6 @@ export default class WorldScene extends Phaser.Scene {
     // Setting keyboard input for movement
     this.cursors = this.input.keyboard.createCursorKeys()
 
-    this.sokoGoals.getChildren().forEach(goal => goal.setTint(0xFF00FF))
-
     // Animating sprite motion
     this.createAnimations()
 
