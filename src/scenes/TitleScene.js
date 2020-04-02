@@ -2,6 +2,7 @@ import 'phaser'
 import firebase from 'firebase'
 import { db } from '../config/firebaseConfig'
 import { setLevelConfig } from '../entity/utilityFunctions'
+import { saveLevelProgression } from '../server/db'
 
 let levelConfig = {}
 
@@ -29,8 +30,17 @@ class TitleScene extends Phaser.Scene {
           .doc(firebase.auth().currentUser.email)
           .get()
           .then(doc => {
-            levelConfig = setLevelConfig(doc.data().level)
-            console.log(doc.data().level)
+            if (!doc.exists) {
+              saveLevelProgression(firebase.auth().currentUser.email, 1)
+              levelConfig = setLevelConfig(1)
+            } else {
+              if (doc.data().completed) {
+                saveLevelProgression(firebase.auth().currentUser.email, 1)
+                levelConfig = setLevelConfig(1)
+              } else {
+                levelConfig = setLevelConfig(doc.data().level)
+              }
+            }
             console.log(levelConfig)
           })
           .catch(function(error) {
@@ -42,18 +52,22 @@ class TitleScene extends Phaser.Scene {
   handleClick() {
     this.cameras.main.fadeOut(500)
 
-    const startWorldScene = () => {
+    const startIntroSceneOrResumeLevel = () => {
       this.time.addEvent({
         delay: 500,
         callback: () => {
-          this.scene.start('WorldScene', levelConfig)
-          this.scene.launch('UIScene')
-          this.scene.bringToTop('UIScene')
-
+          if(levelConfig.level === 1){
+            this.scene.start('IntroScene', levelConfig)
+          } else {
+            this.scene.start('WorldScene', levelConfig)
+            this.scene.launch('UIScene')
+            this.scene.bringToTop('UIScene')
+          }
         }
       })
     }
-    startWorldScene()
+
+    startIntroSceneOrResumeLevel()
   }
 }
 

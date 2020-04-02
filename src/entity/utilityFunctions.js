@@ -14,15 +14,14 @@ function setLevelConfig(level) {
 
   //Create puzzle for level
   let options = {
-    width: (level * 2) + 3, //Unit: 16px squares (without perimeter)
-    height: (level * 2) + 3,
-    boxes: Math.floor(level/2) + 1,
-    minWalls: level + 5
+    width: level + 4, //Unit: 16px squares (without perimeter)
+    height: level + 4,
+    boxes: Math.ceil(level/2) + 2,
+    minWalls: level * 4
   }
 
   //Create map layers for the puzzle sprites
   let rawPuzzle = generatePuzzle(createGeneratorConfig(options))
-  // console.log(rawPuzzle)
   let layers = convertToMapLayers(rawPuzzle)
 
   //Set config for the level and return to WorldScene
@@ -36,10 +35,10 @@ function setLevelConfig(level) {
     puzzleOptions: {
       x: xPuzz, //Unit: Pixels
       y: yPuzz,
-      width: (level * 2) + 5, //Unit: 16px squares (with perimeter)
-      height: (level * 2) + 5,
-      boxes: Math.floor(level/2) + 1,
-      minWalls: level + 7
+      width: level + 6, //Unit: 16px squares (with perimeter)
+      height: level + 6,
+      boxes: Math.ceil(level/2) + 2,
+      minWalls: level * 5
     },
     puzzleLayers: {
       box: layers.boxPuzzleLayer,
