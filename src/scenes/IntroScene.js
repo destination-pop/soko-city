@@ -1,4 +1,5 @@
 import 'phaser'
+import { SplitChunksPlugin } from 'webpack'
 
 
 class IntroScene extends Phaser.Scene {
@@ -18,12 +19,12 @@ class IntroScene extends Phaser.Scene {
     this.cameras.main.fadeIn(500)
 
     // Set up Skip Button
-    let skipButton = this.add.image(600, 420,'skipButton').setScale(0.25)
+    let skipButton = this.add.sprite(600, 420,'skipButton').setScale(0.25)
     skipButton.setInteractive({ useHandCursor: true })
     skipButton.on('pointerdown', () => this.startLevelOne())
 
     //Display Initial Images and Text
-    this.lola = this.add.sprite(700, 300, 'lola').setScale(.25)
+    this.lola = this.add.sprite(300, 300, 'lola').setScale(.25)
     let text1 = this.add.text(20, 100, 'Your best friend Lola is hanging out...', { fontSize: '20px' })
 
     // let text2 = '... when a bad guy sneaks in.'
@@ -37,7 +38,11 @@ class IntroScene extends Phaser.Scene {
   }
 
   update() {
-    this.lola.x = -40
+    this.moveImage(lola, 40)
+  }
+
+  moveImage(image, speed) {
+    image.x += speed
   }
 
   startLevelOne() {
