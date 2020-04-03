@@ -33,19 +33,21 @@ export default class Game extends React.Component {
   constructor(props) {
     super()
     this.state = {
-      restart: false
+      restart: false,
+      gameExists: document.getElementsByTagName('canvas')
     }
   }
   componentDidMount() {
-    // this.game = new phaserGame(this)
+    this.game = new phaserGame(this)
   }
 
   componentWillUnmount() {
-    this.game.destroy(true, false)
+    this.game.destroy(false)
   }
 
   render() {
-    this.game = new phaserGame(this)
-    return <div id="phaser-game" />
+    !this.state.gameExists ? (this.game = new phaserGame(this)) : null
+
+    return <div id="phaser-game"></div>
   }
 }

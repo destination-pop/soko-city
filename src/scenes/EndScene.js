@@ -24,12 +24,13 @@ class EndScene extends Phaser.Scene {
     this.time.addEvent({
       delay: 550,
       callback: () => {
+        this.sys.game.destroy(true)
         this.game.react.setState(prev => {
           return {
-            restart: !prev.restart
+            restart: !prev.restart,
+            gameExists: false
           }
         })
-        this.sys.game.destroy(true)
         firebase.auth().currentUser.email
           ? restartGame(firebase.auth().currentUser.email)
           : null
