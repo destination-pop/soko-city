@@ -281,9 +281,9 @@ export default class WorldScene extends Phaser.Scene {
       )
       let frame = Phaser.Math.RND.between(0, 63)
 
-      console.log(x, y)
-      console.log(this.levelConfig.mapWidth)
-      console.log(this.levelConfig.mapHeight)
+      // console.log(x, y)
+      // console.log(this.levelConfig.mapWidth)
+      // console.log(this.levelConfig.mapHeight)
 
       // if (collisionCheck.every(e => e === -1)) {
       console.log(map.getTileAt(x, y, true, 'Object Layer'))

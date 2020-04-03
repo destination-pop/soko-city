@@ -72,6 +72,8 @@ export default class UIScene extends Phaser.Scene {
     textBox.layout()
     textBox.setInteractive()
 
+    let mainCamera = this.cameras.main
+
     this.input.keyboard.on(
       'keydown-' + 'ENTER',
       function() {
@@ -85,10 +87,8 @@ export default class UIScene extends Phaser.Scene {
           this.isLastPage
         ) {
           textBox.setVisible(false)
+          mainCamera.fadeOut(500)
           this.scene.events.emit('startTransition')
-          //TEST
-          this.cameras.main.fadeOut(500)
-          //END TEST
         } else if (this.isLastPage) {
           textBox.setVisible(false)
         } else {
@@ -223,8 +223,17 @@ export default class UIScene extends Phaser.Scene {
         .setVisible(true)
         .start(levelCompleteLolaDialog, 50)
     }, this)
-  }
+
+
+    //Fade back in the main camera when the level starts and scene wakes
+    this.events.on('wake', () => {
+      mainCamera.fadeIn(500)
+    })
+  } // End of Create method
+
 }
+
+
 
 //to populate inventory bar from world scene info
 const populateInventoryBar = (scene, itemArr) => {
