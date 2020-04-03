@@ -208,15 +208,21 @@ export default class WorldScene extends Phaser.Scene {
     // Animating sprite motion
     this.createAnimations()
 
+
+    //unhiding NPC reward
     this.events.on('puzzleSolved', function(inventoryItems) {
       inventoryItems.getChildren()[0].setVisible(true)
       inventoryItems.getChildren()[0].enableBody()
     })
 
+    //CHEAT FOR TESTING
     this.sokoGoals.getChildren().forEach(goal => goal.setTint(0xFF00FF))
 
+
+    //listening for UI events 
     const uiScene = this.scene.get('UIScene')
 
+    //start transition scene
     uiScene.events.once(
       'startTransition',
       function() {
@@ -238,13 +244,6 @@ export default class WorldScene extends Phaser.Scene {
       this
     )
 
-    uiScene.events.on(
-      'resetLevel', function () {
-        this.events.off('update')
-        this.levelConfig.itemsAcquired = []
-        this.scene.restart()
-      }
-    )
   }
   //end of create method
 
@@ -261,8 +260,8 @@ export default class WorldScene extends Phaser.Scene {
           this.scene.start('EndScene')
         } else {
           this.events.off('update')
-          this.scene.start('TransitionScene', this.levelConfig)
           this.levelConfig = setLevelConfig(this.levelConfig.level + 1)
+          this.scene.start('TransitionScene', this.levelConfig)
         }
       }
     })
@@ -393,11 +392,13 @@ export default class WorldScene extends Phaser.Scene {
     }
   } 
 
+  //collision callback for updating sokobox position
   updateBoxMovement(player, box) {
     box.update()
   }
 
-
+  //overlap callback to tint goals that have been covered by sokoboxes
+  //also triggers puzzle solve event in UI
   puzzleSolve (box, goal) {
     goal.setTint(0xFF00FF)
     goal.disableBody(true, false)
