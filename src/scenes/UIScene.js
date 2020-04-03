@@ -15,28 +15,57 @@ export default class UIScene extends Phaser.Scene {
       sceneKey: 'rexUI'
     })
 
-
+    //loading images
     this.load.image('nextPage', 'assets/UI/arrow-down-left.png')
     this.load.image('close', 'assets/UI/x.png')
     this.load.image('textBox', 'assets/UI/textbox.png')
     this.load.image('reset', 'assets/UI/reset.png')
+    this.load.image('sound', 'assets/UI/sound.png')
+    this.load.image('mute', 'assets/UI/mute.png')
 
+    //loading audio
     this.load.audio('mainSong', 'assets/sound/windlessSlopes.mp3')
     this.load.audio('puzzleSong', 'assets/sound/redCarpetWoodenFloor.mp3')
   }
 
   create() {
+
     //pulling information from World Scene
     const currentGame = this.scene.get('WorldScene')
 
-    //adding music to scene
-    const mainSong = this.sound.add('mainSong')
-    const puzzleSong = this.sound.add('puzzleSong')
 
+    //adding music to scene
+    const mainSong = this.sound.add('mainSong', { volume: .5})
+    const puzzleSong = this.sound.add('puzzleSong', { volume: .5})
+
+    let currentMusic = mainSong
+    let muteMusic = false
+    currentMusic.play({ volume: .5 })
+
+    const soundButton = this.add.sprite(560, 20, 'sound')
+    soundButton.setInteractive({ useHandCursor: true })
+    
+    soundButton.on('pointerdown', () => {
+      muteMusic = !muteMusic
+
+      if (muteMusic) {
+        soundButton.setTexture('mute')
+        currentMusic.setVolume(0)
+      } else {
+        soundButton.setTexture('sound')
+        currentMusic.setVolume(.5)
+      }
+    })
+
+
+
+    //adding a reset button
     const resetButton = this.add.image(600, 20, 'reset').setScale(.17)
     resetButton.setInteractive({ useHandCursor: true })
     resetButton.on('pointerdown', () => {
-      this.events.emit('resetLevel', currentGame)
+      currentGame.events.off('update')
+      currentGame.levelConfig.itemsAcquired = []
+      currentGame.scene.restart()
       }
     )
 
@@ -119,25 +148,26 @@ export default class UIScene extends Phaser.Scene {
       10000
     )
 
-    //starting music
-    mainSong.play()
-
-
+    
     //launching text box for initial quest and populating inventory bar
     currentGame.events.on(
       'newLevel',
       function() {
-        // this.inventoryBar.setVisible(true)
-        // this.resetButton.setVisible(true)
+
         populateInventoryBar(
           this,
           currentGame.inventoryItems.children.entries,
           foodNames
         )
         textBox.setVisible(true).start(levelIntro(), 50)
-        mainSong.stop()
-        puzzleSong.stop()
-        mainSong.play()
+
+        currentMusic = mainSong
+
+        if (muteMusic) {
+          currentMusic.play({ volume: 0 })
+        } else {
+          currentMusic.play({ volume: .5 })
+        }
       },
       this
     )
@@ -148,8 +178,15 @@ export default class UIScene extends Phaser.Scene {
     }, this)
 
     currentGame.events.once('villagerEncounter', function() {
-      mainSong.stop()
-      puzzleSong.play()
+      
+      currentMusic = puzzleSong
+
+      if (muteMusic) {
+        currentMusic.play({ volume: 0 })
+      } else {
+        currentMusic.play({ volume: .5 })
+      }
+
     })
 
 
@@ -173,14 +210,15 @@ export default class UIScene extends Phaser.Scene {
     currentGame.events.once('puzzleSolved', function() {
       textBox.setVisible(true).start(puzzleSolvedDialog, 50)
 
-      puzzleSong.stop()
-      mainSong.play()
-    })
+      currentMusic = mainSong
 
-    // this.events.on('startTransition', function() {
-    //   this.inventoryBar.setVisible(false)
-    //   this.resetButton.setVisible(false)
-    // })
+      if (muteMusic) {
+        currentMusic.play({ volume: 0 })
+      } else {
+        currentMusic.play({ volume: .5 })
+      }
+
+    })
 
     //launching text box on level complete
     currentGame.events.on(
