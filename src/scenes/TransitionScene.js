@@ -7,8 +7,6 @@ class TransitionScene extends Phaser.Scene {
 
 	create(data) {
 
-    
-
     this.add.text(110,100, 'Level Complete', {fontSize: '50px'});
     this.add.text(100,240, 'You solved the challenge.', {fontSize: '30px'})
     this.add.text(145,280, 'But where is Lola?', {fontSize: '30px'})
@@ -20,6 +18,7 @@ class TransitionScene extends Phaser.Scene {
       delay: 3500,
       callback: () => {
         this.scene.start('WorldScene', this.levelConfig);
+        this.scene.wake('UIScene')
         this.scene.bringToTop('UIScene')
       }
     })
