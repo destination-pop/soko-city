@@ -41,7 +41,6 @@ class TitleScene extends Phaser.Scene {
                 levelConfig = setLevelConfig(doc.data().level)
               }
             }
-            console.log(levelConfig)
           })
           .catch(function(error) {
             console.error('Your save data could not be loaded')
