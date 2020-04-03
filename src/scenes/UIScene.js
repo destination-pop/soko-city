@@ -7,7 +7,7 @@ export default class UIScene extends Phaser.Scene {
     //load background image for inventory bar
     this.load.image('graySquare', 'assets/sprites/graySquare.png')
 
-    //load plugin and images for text box
+    // load plugin and images for text box
     this.load.scenePlugin({
       key: 'rexuiplugin',
       url:
@@ -15,9 +15,12 @@ export default class UIScene extends Phaser.Scene {
       sceneKey: 'rexUI'
     })
 
+
     this.load.image('nextPage', 'assets/UI/arrow-down-left.png')
     this.load.image('close', 'assets/UI/x.png')
     this.load.image('textBox', 'assets/UI/textbox.png')
+    this.load.image('reset', 'assets/UI/reset.png')
+
     this.load.audio('mainSong', 'assets/sound/windlessSlopes.mp3')
     this.load.audio('puzzleSong', 'assets/sound/redCarpetWoodenFloor.mp3')
   }
@@ -26,7 +29,17 @@ export default class UIScene extends Phaser.Scene {
     //pulling information from World Scene
     const currentGame = this.scene.get('WorldScene')
 
-    const mainGameSong = this.sound.play('mainSong')
+    //adding music to scene
+    const mainSong = this.sound.add('mainSong')
+    const puzzleSong = this.sound.add('puzzleSong')
+
+    const resetButton = this.add.image(600, 20, 'reset').setScale(.17)
+    resetButton.setInteractive({ useHandCursor: true })
+    resetButton.on('pointerdown', () => {
+      this.events.emit('resetLevel', currentGame)
+      }
+    )
+
 
     // initializing text box for quests
     const textBox = this.rexUI.add.textBox({
@@ -103,29 +116,38 @@ export default class UIScene extends Phaser.Scene {
       10000
     )
 
+    //starting music
+    mainSong.play()
+
+    
     //launching text box for initial quest and populating inventory bar
     currentGame.events.on(
       'newLevel',
       function() {
-        this.inventoryBar.setVisible(true)
+        // this.inventoryBar.setVisible(true)
+        // this.resetButton.setVisible(true)
         populateInventoryBar(
           this,
           currentGame.inventoryItems.children.entries,
           foodNames
         )
         textBox.setVisible(true).start(levelIntro(), 50)
+        mainSong.stop()
+        puzzleSong.stop()
+        mainSong.play()
       },
       this
     )
 
     //launching text box on villager encounter
-    currentGame.events.once('villagerEncounter', function(villager) {
+    currentGame.events.on('villagerEncounter', function(villager) {
       textBox.setVisible(true).start(initialVillagerDialog(currentGame, villager, foodNames), 50)
     }, this)
 
-    currentGame.events.once('villagerReward', function(villager) {
-      textBox.setVisible(true).start(itemFromVillagerDialog(currentGame, villager, foodNames), 50)
-    }, this)
+    currentGame.events.once('villagerEncounter', function() {
+      mainSong.stop()
+      puzzleSong.play()
+    })
 
 
 
@@ -145,9 +167,17 @@ export default class UIScene extends Phaser.Scene {
       this
     )
 
-    currentGame.events.on('puzzleSolved', function() {
+    currentGame.events.once('puzzleSolved', function() {
       textBox.setVisible(true).start(puzzleSolvedDialog, 50)
+
+      puzzleSong.stop()
+      mainSong.play()
     })
+
+    // this.events.on('startTransition', function() {
+    //   this.inventoryBar.setVisible(false)
+    //   this.resetButton.setVisible(false)
+    // })
 
     //launching text box on level complete
     currentGame.events.on(
@@ -173,6 +203,23 @@ export default class UIScene extends Phaser.Scene {
       },
       this
     )
+
+    currentGame.events.on('maybeLola', function (item) {
+      this.inventoryBar.children.entries.forEach(el => {
+        if (item === el.frame.name) {
+          el.clearTint()
+          textBox
+            .setVisible(true)
+            .start(maybeLolaDialog, 50)
+        }
+      })
+    }, this)
+
+    currentGame.events.on('levelCompleteLola', function () {
+      textBox
+        .setVisible(true)
+        .start(levelCompleteLolaDialog, 50)
+    }, this)
   }
 }
 
@@ -291,11 +338,11 @@ const initialVillagerDialog = (scene, villager, foodNames) => {
   return `Ah, you're the stranger looking for their pet chicken?  I'm afraid I can't do anything until I solve this mysterious puzzle in my yard!  Could you help me solve it??  I would gladly repay you with a ${foodNames[inventoryNum]}!`
 }
 
-const itemFromVillagerDialog = (scene, foodItem, foodNames) => {
-  return `Thank you so much for your help, you are brilliant!  Here is the ${foodNames[foodItem]} I promised you!`
-}
-
 const puzzleSolvedDialog = `You've solved it!  Go to the villager to collect your reward.`
+
+const maybeLolaDialog = `You found a chicken!  Lola???  No, it's a turkey.`
+
+const levelCompleteLolaDialog = `A turkey! It's not Lola, but you've collected all the items needed!  Time to continue your journey to the next village!!!`
 
 const itemFoundDialog = (scene, foodItem, foodNames) => {
   return `You found a ${foodNames[foodItem]}!`

@@ -67,7 +67,6 @@ export default class WorldScene extends Phaser.Scene {
 
   create(data) {
     this.levelConfig = data
-    console.log('Level Config Data: ', this.levelConfig)
 
     //fade into the scene
     this.cameras.main.fadeIn(500)
@@ -150,6 +149,7 @@ export default class WorldScene extends Phaser.Scene {
     // Setting our world bounds
     this.physics.world.bounds.width = map.widthInPixels
     this.physics.world.bounds.height = map.heightInPixels
+    
 
     // Setting collision rules for player
     this.physics.add.collider(this.player, objectLayer) //Blocks off trees
@@ -220,8 +220,7 @@ export default class WorldScene extends Phaser.Scene {
     uiScene.events.once(
       'startTransition',
       function() {
-        uiScene.inventoryBar.setVisible(false)
-        this.transitionToNextLevel()
+        this.transitionToNextLevel(this.levelConfig.level)
 
         if (this.levelConfig.level === 5) {
           firebase.auth().currentUser.email
@@ -237,6 +236,14 @@ export default class WorldScene extends Phaser.Scene {
         }
       },
       this
+    )
+
+    uiScene.events.once(
+      'resetLevel', function (level) {
+        level.events.off('update')
+        level.levelConfig.itemsAcquired = []
+        level.scene.restart()
+      }
     )
   }
   //end of create method
@@ -259,7 +266,7 @@ export default class WorldScene extends Phaser.Scene {
     })
   }
 
-  randomizeItems(group, levelConfig) {
+  randomizeItems(group, levelConfig, foodNames) {
     let unique = []
 
     while (unique.length < levelConfig.itemsToAcquire) {
@@ -372,22 +379,25 @@ export default class WorldScene extends Phaser.Scene {
 
     this.levelConfig.itemsAcquired.push(item)
 
-    if (
-      this.levelConfig.itemsAcquired.length === this.levelConfig.itemsToAcquire
-    ) {
+    if (this.levelConfig.itemsAcquired.length === this.levelConfig.itemsToAcquire) {
       this.events.emit('levelComplete', this.levelConfig.level, item.frame.name)
-      console.log('Level Completed: ', this.levelConfig.level)
-    } else {
+    } else if (item.frame.name === 25) {
+      this.events.emit('maybeLola', item.frame.name)
+    } else if ((item.frame.name === 25) && (this.levelConfig.itemsAcquired.length === this.levelConfig.itemsToAcquire)) {
+      this.events.emit('levelCompleteLola')
+    }
+      else {
       this.events.emit('itemFound', item.frame.name)
     }
-  }
+  } 
 
   updateBoxMovement(player, box) {
     box.update()
   }
 
-  puzzleSolve(box, goal) {
-    goal.setTint(0xff00ff)
+
+  puzzleSolve (box, goal) {
+    goal.setTint(0xFF00FF)
     goal.disableBody(true, false)
 
     let allGoals = this.sokoGoals.getChildren()
@@ -397,6 +407,7 @@ export default class WorldScene extends Phaser.Scene {
       })
     ) {
       this.events.emit('puzzleSolved', this.inventoryItems)
+      this.events.off('villagerEncounter')
     }
   }
 

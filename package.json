@@ -26,6 +26,7 @@
     "node-sass": "^4.13.1",
     "nodemon": "^2.0.2",
     "phaser": "^3.22.0",
+    "phaser3-rex-plugins": "^1.1.11",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-firebaseui": "^4.1.0",
