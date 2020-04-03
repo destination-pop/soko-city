@@ -1,8 +1,8 @@
 const phaserConfig = {
   type: Phaser.AUTO,
-  parent: 'content',
   width: 320 * 2,
   height: 240 * 2,
+  parent: 'phaser-game',
   // zoom: 3,
   pixelArt: true,
   physics: {
@@ -11,8 +11,7 @@ const phaserConfig = {
       gravity: { y: 0 },
       debug: false
     }
-  },
-  parent: 'phaser-game'
+  }
 }
 
 export default phaserConfig
