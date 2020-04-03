@@ -149,7 +149,7 @@ export default class WorldScene extends Phaser.Scene {
     // Setting our world bounds
     this.physics.world.bounds.width = map.widthInPixels
     this.physics.world.bounds.height = map.heightInPixels
-    
+
 
     // Setting collision rules for player
     this.physics.add.collider(this.player, objectLayer) //Blocks off trees
@@ -251,6 +251,8 @@ export default class WorldScene extends Phaser.Scene {
   //loads the transition scene leading to the next level scene
   transitionToNextLevel() {
     this.cameras.main.fadeOut(500)
+    // this.cameras.fadeOut(500,0,0,0,null,'UIScene')
+
     this.time.addEvent({
       delay: 500,
       callback: () => {
@@ -260,6 +262,7 @@ export default class WorldScene extends Phaser.Scene {
         } else {
           this.events.off('update')
           this.levelConfig = setLevelConfig(this.levelConfig.level + 1)
+          this.scene.sleep('UIScene')
           this.scene.start('TransitionScene', this.levelConfig)
         }
       }
@@ -278,9 +281,9 @@ export default class WorldScene extends Phaser.Scene {
       )
       let frame = Phaser.Math.RND.between(0, 63)
 
-      console.log(x, y)
-      console.log(this.levelConfig.mapWidth)
-      console.log(this.levelConfig.mapHeight)
+      // console.log(x, y)
+      // console.log(this.levelConfig.mapWidth)
+      // console.log(this.levelConfig.mapHeight)
 
       // if (collisionCheck.every(e => e === -1)) {
       console.log(map.getTileAt(x, y, true, 'Object Layer'))
@@ -389,7 +392,7 @@ export default class WorldScene extends Phaser.Scene {
       else {
       this.events.emit('itemFound', item.frame.name)
     }
-  } 
+  }
 
   //collision callback for updating sokobox position
   updateBoxMovement(player, box) {
