@@ -86,6 +86,9 @@ export default class UIScene extends Phaser.Scene {
         ) {
           textBox.setVisible(false)
           this.scene.events.emit('startTransition')
+          //TEST
+          this.cameras.main.fadeOut(500)
+          //END TEST
         } else if (this.isLastPage) {
           textBox.setVisible(false)
         } else {
@@ -119,7 +122,7 @@ export default class UIScene extends Phaser.Scene {
     //starting music
     mainSong.play()
 
-    
+
     //launching text box for initial quest and populating inventory bar
     currentGame.events.on(
       'newLevel',
