@@ -20,6 +20,8 @@ export default class UIScene extends Phaser.Scene {
     this.load.image('close', 'assets/UI/x.png')
     this.load.image('textBox', 'assets/UI/textbox.png')
     this.load.image('reset', 'assets/UI/reset.png')
+    this.load.image('sound', 'assets/UI/sound.png')
+    this.load.image('mute', 'assets/UI/mute.png')
 
     this.load.audio('mainSong', 'assets/sound/windlessSlopes.mp3')
     this.load.audio('puzzleSong', 'assets/sound/redCarpetWoodenFloor.mp3')
@@ -30,9 +32,32 @@ export default class UIScene extends Phaser.Scene {
     const currentGame = this.scene.get('WorldScene')
 
     //adding music to scene
-    const mainSong = this.sound.add('mainSong')
-    const puzzleSong = this.sound.add('puzzleSong')
+    const mainSong = this.sound.add('mainSong', { volume: .5})
+    const puzzleSong = this.sound.add('puzzleSong', { volume: .5})
 
+    let muteMusic = false
+
+    let currentMusic = mainSong
+    currentMusic.play()
+
+    const soundButton = this.add.sprite(560, 20, 'sound')
+    soundButton.setInteractive({ useHandCursor: true })
+    
+    soundButton.on('pointerdown', () => {
+      muteMusic = !muteMusic
+
+      if (muteMusic) {
+        soundButton.setTexture('mute')
+        currentMusic.stop()
+      } else {
+        soundButton.setTexture('sound')
+        currentMusic.play()
+      }
+    })
+
+
+
+    //adding a reset button
     const resetButton = this.add.image(600, 20, 'reset').setScale(.17)
     resetButton.setInteractive({ useHandCursor: true })
     resetButton.on('pointerdown', () => {
@@ -116,9 +141,6 @@ export default class UIScene extends Phaser.Scene {
       10000
     )
 
-    //starting music
-    mainSong.play()
-
     
     //launching text box for initial quest and populating inventory bar
     currentGame.events.on(
@@ -132,9 +154,9 @@ export default class UIScene extends Phaser.Scene {
           foodNames
         )
         textBox.setVisible(true).start(levelIntro(), 50)
-        mainSong.stop()
-        puzzleSong.stop()
-        mainSong.play()
+        currentMusic.stop()
+        currentMusic = mainSong
+        currentMusic.play()
       },
       this
     )
@@ -145,8 +167,9 @@ export default class UIScene extends Phaser.Scene {
     }, this)
 
     currentGame.events.once('villagerEncounter', function() {
-      mainSong.stop()
-      puzzleSong.play()
+      currentMusic.stop()
+      currentMusic = puzzleSong
+      currentMusic.play()
     })
 
 
@@ -170,8 +193,9 @@ export default class UIScene extends Phaser.Scene {
     currentGame.events.once('puzzleSolved', function() {
       textBox.setVisible(true).start(puzzleSolvedDialog, 50)
 
-      puzzleSong.stop()
-      mainSong.play()
+      currentMusic.stop()
+      currentMusic = mainSong
+      currentMusic.play()
     })
 
     // this.events.on('startTransition', function() {

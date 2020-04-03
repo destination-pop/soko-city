@@ -213,7 +213,7 @@ export default class WorldScene extends Phaser.Scene {
       inventoryItems.getChildren()[0].enableBody()
     })
 
-    // this.sokoGoals.getChildren().forEach(goal => goal.setTint(0xFF00FF))
+    this.sokoGoals.getChildren().forEach(goal => goal.setTint(0xFF00FF))
 
     const uiScene = this.scene.get('UIScene')
 
@@ -238,15 +238,17 @@ export default class WorldScene extends Phaser.Scene {
       this
     )
 
-    uiScene.events.once(
-      'resetLevel', function (level) {
-        level.events.off('update')
-        level.levelConfig.itemsAcquired = []
-        level.scene.restart()
+    uiScene.events.on(
+      'resetLevel', function () {
+        this.events.off('update')
+        this.levelConfig.itemsAcquired = []
+        this.scene.restart()
       }
     )
   }
   //end of create method
+
+
 
   //loads the transition scene leading to the next level scene
   transitionToNextLevel() {
@@ -258,9 +260,9 @@ export default class WorldScene extends Phaser.Scene {
           this.events.off('update')
           this.scene.start('EndScene')
         } else {
-          this.levelConfig = setLevelConfig(this.levelConfig.level + 1)
           this.events.off('update')
           this.scene.start('TransitionScene', this.levelConfig)
+          this.levelConfig = setLevelConfig(this.levelConfig.level + 1)
         }
       }
     })
