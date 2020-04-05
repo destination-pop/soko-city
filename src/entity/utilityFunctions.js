@@ -14,9 +14,9 @@ function setLevelConfig(level) {
 
   //Create puzzle for level
   let options = {
-    width: level + 4, //Unit: 16px squares (without perimeter)
-    height: level + 4,
-    boxes: Math.ceil(level/2) + 2,
+    width: level + 3, //Unit: 16px squares (without perimeter)
+    height: level + 3,
+    boxes: Math.floor(level/2) + 1,
     minWalls: level * 4
   }
 
@@ -30,15 +30,15 @@ function setLevelConfig(level) {
     itemsToAcquire: level + 2,
     itemsAcquired: [],
     NPC: 1, //This is also the number of puzzles
-    mapWidth: (level + 2) * 10, //Unit: 16px squares
-    mapHeight: (level + 2) * 10,
+    mapWidth: 25 + (level * 5), //Unit: 16px squares
+    mapHeight: 25 + (level * 5),
     puzzleOptions: {
       x: xPuzz, //Unit: Pixels
       y: yPuzz,
-      width: level + 6, //Unit: 16px squares (with perimeter)
-      height: level + 6,
-      boxes: Math.ceil(level/2) + 2,
-      minWalls: level * 5
+      width: options.width + 2, //Unit: 16px squares (with perimeter)
+      height: options.height + 2,
+      boxes: options.boxes,
+      minWalls: options.minWalls
     },
     puzzleLayers: {
       box: layers.boxPuzzleLayer,
