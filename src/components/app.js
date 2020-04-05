@@ -1,9 +1,14 @@
 import React from 'react'
 import MainContent from './mainContent'
-import instructions from './instructionOnSide'
+import Footer from './footer'
 
 const App = () => {
-  return <MainContent />
+  return (
+    <React.Fragment>
+      <MainContent />
+      <Footer />
+    </React.Fragment>
+  )
 }
 
 export default App

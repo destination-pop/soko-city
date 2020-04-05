@@ -48,7 +48,7 @@ class MainContent extends Component {
 
   render() {
     return (
-      <div>
+      <div className="main">
         <NavBar isLoggedIn={this.state.isLoggedIn} logout={this.logout} />
         {!this.state.isLoggedIn ? (
           <StyledFirebaseAuth
@@ -56,11 +56,10 @@ class MainContent extends Component {
             firebaseAuth={firebase.auth()}
           />
         ) : (
-          <div> 
+          <div className="container">
             <Game />
             <GameInstructions />
           </div>
-
         )}
       </div>
     )

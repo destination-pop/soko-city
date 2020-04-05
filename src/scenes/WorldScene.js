@@ -67,7 +67,6 @@ export default class WorldScene extends Phaser.Scene {
 
   create(data) {
     this.levelConfig = data
-    console.log('Level Config Data: ', this.levelConfig)
 
     //fade into the scene
     this.cameras.main.fadeIn(500)
@@ -99,13 +98,13 @@ export default class WorldScene extends Phaser.Scene {
 
     // If 3x3 area around (4, 3) is empty, we'll spawn our player here
     // Otherwise, it will keep searching for a good spot
-    this.randomizePlayerSpawn(1, 1)
+    this.randomizePlayerSpawn(2, 2)
 
     this.inventoryItems = this.physics.add.group({
       classType: InventoryItem
     })
 
-    this.randomizeItems(this.inventoryItems, this.levelConfig.itemsToAcquire)
+    // this.randomizeItems(this.inventoryItems, this.levelConfig.itemsToAcquire)
 
     //creating random villagers
     this.villagers = this.physics.add.group({
@@ -151,6 +150,7 @@ export default class WorldScene extends Phaser.Scene {
     this.physics.world.bounds.width = map.widthInPixels
     this.physics.world.bounds.height = map.heightInPixels
 
+
     // Setting collision rules for player
     this.physics.add.collider(this.player, objectLayer) //Blocks off trees
     this.physics.add.collider(this.player, groundLayer) //Blocks off the edges
@@ -161,7 +161,6 @@ export default class WorldScene extends Phaser.Scene {
       null,
       this
     )
-
 
     //setting all puzzle collisions
     this.physics.add.collider(
@@ -209,20 +208,24 @@ export default class WorldScene extends Phaser.Scene {
     // Animating sprite motion
     this.createAnimations()
 
+
+    //unhiding NPC reward
     this.events.on('puzzleSolved', function(inventoryItems) {
       inventoryItems.getChildren()[0].setVisible(true)
       inventoryItems.getChildren()[0].enableBody()
     })
 
+    //DEVHAX -- helps esther test things better
     // this.sokoGoals.getChildren().forEach(goal => goal.setTint(0xFF00FF))
 
+    //listening for UI events 
     const uiScene = this.scene.get('UIScene')
 
+    //start transition scene
     uiScene.events.once(
       'startTransition',
       function() {
-        uiScene.inventoryBar.setVisible(false)
-        this.transitionToNextLevel()
+        this.transitionToNextLevel(this.levelConfig.level)
 
         if (this.levelConfig.level === 5) {
           firebase.auth().currentUser.email
@@ -239,12 +242,17 @@ export default class WorldScene extends Phaser.Scene {
       },
       this
     )
+
   }
   //end of create method
+
+
 
   //loads the transition scene leading to the next level scene
   transitionToNextLevel() {
     this.cameras.main.fadeOut(500)
+    // this.cameras.fadeOut(500,0,0,0,null,'UIScene')
+
     this.time.addEvent({
       delay: 500,
       callback: () => {
@@ -252,26 +260,40 @@ export default class WorldScene extends Phaser.Scene {
           this.events.off('update')
           this.scene.start('EndScene')
         } else {
-          this.levelConfig = setLevelConfig(this.levelConfig.level + 1)
           this.events.off('update')
+          this.levelConfig = setLevelConfig(this.levelConfig.level + 1)
+          this.scene.sleep('UIScene')
           this.scene.start('TransitionScene', this.levelConfig)
         }
       }
     })
   }
 
-  randomizeItems(group, levelConfig) {
+  randomizeItems(group, levelConfig, foodNames) {
     let unique = []
 
     while (unique.length < levelConfig.itemsToAcquire) {
-      let x = Phaser.Math.RND.between(200, 300)
-      let y = Phaser.Math.RND.between(200, 300)
+      let x = Math.floor(
+        Phaser.Math.RND.between(5, this.levelConfig.mapWidth - 5)
+      )
+      let y = Math.floor(
+        Phaser.Math.RND.between(5, this.levelConfig.mapHeight - 5)
+      )
       let frame = Phaser.Math.RND.between(0, 63)
 
-      if (unique.indexOf(frame) === -1) {
-        unique.push(frame)
-        let item = new InventoryItem(this, x, y, 'food', frame)
-        group.add(item)
+      // console.log(x, y)
+      // console.log(this.levelConfig.mapWidth)
+      // console.log(this.levelConfig.mapHeight)
+
+      // if (collisionCheck.every(e => e === -1)) {
+      console.log(map.getTileAt(x, y, true, 'Object Layer'))
+      if (map.getTileAt(x, y, true, 'Object Layer').index === -1) {
+        if (unique.indexOf(frame) === -1) {
+          unique.push(frame)
+          let item = new InventoryItem(this, x * 16, y * 16, 'food', frame)
+          group.add(item)
+        }
+        // let item = new InventoryItem(this, x, y, 'food', frame)
       }
     }
     this.events.emit('newLevel')
@@ -280,9 +302,11 @@ export default class WorldScene extends Phaser.Scene {
   randomizeNPCs(group, levelConfig) {
     let unique = []
     while (unique.length < levelConfig.NPC) {
-      let x = ((levelConfig.puzzleOptions.width - 4) * 16) +  levelConfig.puzzleOptions.x
-      let y = ((levelConfig.puzzleOptions.height + 0.5) * 16)
-      + levelConfig.puzzleOptions.y
+      let x =
+        (levelConfig.puzzleOptions.width - 4) * 16 + levelConfig.puzzleOptions.x
+      let y =
+        (levelConfig.puzzleOptions.height + 0.5) * 16 +
+        levelConfig.puzzleOptions.y
       let frame = Phaser.Math.RND.between(0, 8)
 
       if (unique.indexOf(frame) === -1) {
@@ -296,8 +320,13 @@ export default class WorldScene extends Phaser.Scene {
 
   hideNPCitem(group, levelConfig) {
     let npcItem = group.getChildren()[0]
-    npcItem.setX(((levelConfig.puzzleOptions.width - 3) * 16) + levelConfig.puzzleOptions.x)
-    npcItem.setY(((levelConfig.puzzleOptions.height + 0.5) * 16) + levelConfig.puzzleOptions.y)
+    npcItem.setX(
+      (levelConfig.puzzleOptions.width - 3) * 16 + levelConfig.puzzleOptions.x
+    )
+    npcItem.setY(
+      (levelConfig.puzzleOptions.height + 0.5) * 16 +
+        levelConfig.puzzleOptions.y
+    )
     npcItem.disableBody(true, true)
   }
 
@@ -353,29 +382,37 @@ export default class WorldScene extends Phaser.Scene {
 
     this.levelConfig.itemsAcquired.push(item)
 
-    if (
-      this.levelConfig.itemsAcquired.length === this.levelConfig.itemsToAcquire
-    ) {
+    if (this.levelConfig.itemsAcquired.length === this.levelConfig.itemsToAcquire) {
       this.events.emit('levelComplete', this.levelConfig.level, item.frame.name)
-      console.log('Level Completed: ', this.levelConfig.level)
-    } else {
+    } else if (item.frame.name === 25) {
+      this.events.emit('maybeLola', item.frame.name)
+    } else if ((item.frame.name === 25) && (this.levelConfig.itemsAcquired.length === this.levelConfig.itemsToAcquire)) {
+      this.events.emit('levelCompleteLola')
+    }
+      else {
       this.events.emit('itemFound', item.frame.name)
     }
   }
 
+  //collision callback for updating sokobox position
   updateBoxMovement(player, box) {
     box.update()
   }
 
-  puzzleSolve(box, goal) {
-    goal.setTint(0xff00ff)
+  //overlap callback to tint goals that have been covered by sokoboxes
+  //also triggers puzzle solve event in UI
+  puzzleSolve (box, goal) {
+    goal.setTint(0xFF00FF)
     goal.disableBody(true, false)
 
     let allGoals = this.sokoGoals.getChildren()
-    if (allGoals.every(function (goal) {
-      return goal.isTinted
-    })) {
+    if (
+      allGoals.every(function(goal) {
+        return goal.isTinted
+      })
+    ) {
       this.events.emit('puzzleSolved', this.inventoryItems)
+      this.events.off('villagerEncounter')
     }
   }
 
