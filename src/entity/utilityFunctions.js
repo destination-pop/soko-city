@@ -5,8 +5,8 @@ import { convertToMapLayers } from '../puzzles/converter'
 function setLevelConfig(level) {
 
   //Randomize puzzle placement
-  let puzzHeight = (level * 2) + 3 //unit: squares
-  let mapHeight = (level + 2) * 10 //unit: squares
+  let puzzHeight = level + 5 //unit: squares
+  let mapHeight = 25 + (level * 5) //unit: squares
   let minPuzzPlacement = 2 //Topmost appropriate point for puzzle, in tiles
   let maxPuzzPlacement = mapHeight - puzzHeight - 3 //Ditto for bottom-most
   let xPuzz = 16*(Math.floor(Math.random()*(maxPuzzPlacement - minPuzzPlacement)) + minPuzzPlacement)
@@ -117,6 +117,6 @@ const foodNames = {
 
 
 export {
-  setLevelConfig, 
+  setLevelConfig,
   foodNames
 }

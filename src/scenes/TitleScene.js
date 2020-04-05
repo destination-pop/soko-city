@@ -19,9 +19,9 @@ class TitleScene extends Phaser.Scene {
   create() {
     const titleSceneBackground = this.add.sprite(0, 0, 'background')
     titleSceneBackground.setOrigin(0, 0)
-    this.add.text(120, 100, 'SOKO-CITY', { fontSize: '70px' })
+    this.add.text(160, 100, 'SOKOCITY', { fontSize: '70px' })
 
-    const text = this.add.text(220, 320, 'start game', { fontSize: '30px' })
+    const text = this.add.text(235, 320, 'start game', { fontSize: '30px' })
     text.setInteractive({ useHandCursor: true })
     text.on('pointerdown', () => this.handleClick())
     firebase.auth().currentUser.email
