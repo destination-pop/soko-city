@@ -7,10 +7,11 @@ Soko-City is an RPG adventure game featuring Sokoban puzzles, level progression,
 Our group wanted to build an visually-pleasing but robust puzzle adventure game, inspired loosely by games like Stardew Valley. We liked the idea of incorporating a Japanese Sokoban puzzle into a larger themed adventure. And so Soko-City was born.
 
 **Technologies**
-* Phaser.io
 * Javascript
+* Phaser.io
+* React.JS
 * Node.JS
-* Firebase Firestore
+* Google Cloud Firestore
 * Procedural Level Generator in Javascript: https://www.npmjs.com/package/sokoban-generator
 
 **Installation**
