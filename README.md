@@ -23,7 +23,8 @@ Our group wanted to build an visually-pleasing but robust puzzle adventure game,
 **Artwork Credits**
 * Lola the Chicken: Esther Kim
 * Bad Guy: Jasmin Soltani
-* Food Sprites: Henry Software https://henrysoftware.itch.io/pixel-food
+* Food Sprites: Henry Software, https://henrysoftware.itch.io/pixel-food
+* Pixel Heart: Ben Bushnell, https://pixabay.com/users/benbushnell-5879465/
 
 **Contributors**
 * Renee Berger

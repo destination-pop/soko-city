@@ -218,7 +218,7 @@ export default class WorldScene extends Phaser.Scene {
     //DEVHAX -- helps esther test things better
     // this.sokoGoals.getChildren().forEach(goal => goal.setTint(0xFF00FF))
 
-    //listening for UI events 
+    //listening for UI events
     const uiScene = this.scene.get('UIScene')
 
     //start transition scene
@@ -251,8 +251,6 @@ export default class WorldScene extends Phaser.Scene {
   //loads the transition scene leading to the next level scene
   transitionToNextLevel() {
     this.cameras.main.fadeOut(500)
-    // this.cameras.fadeOut(500,0,0,0,null,'UIScene')
-
     this.time.addEvent({
       delay: 500,
       callback: () => {
@@ -281,19 +279,12 @@ export default class WorldScene extends Phaser.Scene {
       )
       let frame = Phaser.Math.RND.between(0, 63)
 
-      // console.log(x, y)
-      // console.log(this.levelConfig.mapWidth)
-      // console.log(this.levelConfig.mapHeight)
-
-      // if (collisionCheck.every(e => e === -1)) {
-      console.log(map.getTileAt(x, y, true, 'Object Layer'))
       if (map.getTileAt(x, y, true, 'Object Layer').index === -1) {
         if (unique.indexOf(frame) === -1) {
           unique.push(frame)
           let item = new InventoryItem(this, x * 16, y * 16, 'food', frame)
           group.add(item)
         }
-        // let item = new InventoryItem(this, x, y, 'food', frame)
       }
     }
     this.events.emit('newLevel')

@@ -6,7 +6,6 @@ export default class MainScene extends Phaser.Scene {
   }
 
   create() {
-    // console.log(this.game.react.state)
     //Start the scene with the title scene
     this.scene.start('TitleScene')
   }

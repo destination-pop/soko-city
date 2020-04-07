@@ -19,7 +19,6 @@ const NavBar = props => {
     <div>
       <nav>
         <img id="logo" />
-        {/* {console.log(storage.ref('sokocity.png').getDownloadURL())} */}
         {isLoggedIn ? (
           <button type="button" id="navButton" onClick={logout}>
             SIGN OUT
