@@ -215,9 +215,6 @@ export default class WorldScene extends Phaser.Scene {
       inventoryItems.getChildren()[0].enableBody()
     })
 
-    //DEVHAX -- helps esther test things better
-    // this.sokoGoals.getChildren().forEach(goal => goal.setTint(0xFF00FF))
-
     //listening for UI events
     const uiScene = this.scene.get('UIScene')
 

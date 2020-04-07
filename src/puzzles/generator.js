@@ -37,15 +37,19 @@ let puzzleContainsSolvedTiles = puzzleData => {
 function generatePuzzle(config) {
   let puzzle = sokobanGenerator.generateSokobanLevel(createGeneratorConfig(config))
 
-
-  while (puzzle === null) {
+  let foundUsablePuzzle = false
+  while (foundUsablePuzzle === false) {
     //if puzzle times out, regenerate
-    puzzle = sokobanGenerator.generateSokobanLevel(createGeneratorConfig(config))
-  }
+    while (puzzle === null) {
+      puzzle = sokobanGenerator.generateSokobanLevel(createGeneratorConfig(config))
+    }
+    //If puzzle contains only unsolved tiles, use it
+    if (!puzzleContainsSolvedTiles(puzzle._data._data)) {
+      foundUsablePuzzle = true
+    } else {
+      puzzle = sokobanGenerator.generateSokobanLevel(createGeneratorConfig(config))
+    }
 
-  while(puzzleContainsSolvedTiles(puzzle._data._data)) {
-    //if puzzle contains solved tiles, regenerate
-    puzzle = sokobanGenerator.generateSokobanLevel(createGeneratorConfig(config))
   }
 
   return puzzle
