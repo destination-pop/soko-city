@@ -6,6 +6,10 @@ Soko-City is an RPG adventure game featuring Sokoban puzzles, level progression,
 
 Our group wanted to build an visually-pleasing but robust puzzle adventure game, inspired loosely by games like Stardew Valley. We liked the idea of incorporating a Japanese Sokoban puzzle into a larger themed adventure. And so Soko-City was born.
 
+![intro scene](https://github.com/destination-pop/soko-city/blob/master/demo-intro.gif)
+
+![level play](https://github.com/destination-pop/soko-city/blob/master/demo-level.gif)
+
 **Technologies**
 * Javascript
 * Phaser.io
