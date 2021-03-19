@@ -1,7 +1,6 @@
 # Soko-City: A Puzzle Adventure Game
 
-Soko-City is an RPG adventure game featuring Sokoban puzzles, level progression, and randomly-generated inventory and terrain. We built the game out programmatically so that the levels can continue indefinitely. Our current game features five dynamic levels. Play at https://soko-city.firebaseapp.com/
-
+Soko-City is an RPG adventure game featuring Sokoban puzzles, level progression, and randomly-generated inventory and terrain. We built the game out programmatically so that the levels can continue indefinitely. Our current game features five dynamic levels.
 **Motivation**
 
 Our group wanted to build an visually-pleasing but robust puzzle adventure game, inspired loosely by games like Stardew Valley. We liked the idea of incorporating a Japanese Sokoban puzzle into a larger themed adventure. And so Soko-City was born.
@@ -35,3 +34,5 @@ Our group wanted to build an visually-pleasing but robust puzzle adventure game,
 * Esther Kim
 * Marie Luongo
 * Jasmin Soltani
+
+Play at https://soko-city.firebaseapp.com/
