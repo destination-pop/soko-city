@@ -23,7 +23,7 @@
     "firebase-admin": "^8.10.0",
     "firebase-tools": "^7.15.1",
     "firebaseui": "^4.5.0",
-    "node-sass": "^4.13.1",
+    "node-sass": "^7.0.0",
     "nodemon": "^2.0.2",
     "phaser": "^3.22.0",
     "phaser3-rex-plugins": "^1.1.11",
